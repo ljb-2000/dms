@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Charts</title>
+
+  <link href="./static/css/c3.min.css" rel="stylesheet" type="text/css">
+
+  <script src="./static/js/d3.min.js"></script>
+  <script src="./static/js/c3.min.js"></script>
+</head>
+
+<body>
+  <div id="chartCPU"></div>
+  <div id="chartMEM"></div>
+
+  <script>
+    var chartCPU = c3.generate({
+      bindto: '#chartCPU',
+      data: {
+        columns: []
+      },
+      axis: {
+        x: {
+          max: 9
+        },
+        y: {
+          tick: {
+            format: d3.format(',.1f')
+          }
+        }
+      },
+      grid: {
+        x: {
+          show: true
+        },
+        y: {
+          show: true
+        }
+      }
+    })
+
+    var chartMEM = c3.generate({
+      bindto: '#chartMEM',
+      data: {
+        columns: []
+      },
+      axis: {
+        x: {
+          max: 9
+        },
+        y: {
+          tick: {
+            format: d3.format(',.1f')
+          }
+        }
+      },
+      grid: {
+        x: {
+          show: true
+        },
+        y: {
+          show: true
+        }
+      }
+    })
+
+    let cpu = ['CPU']
+    let mem = ['MEM']
+
+    setInterval(function () {
+      fetch('http://localhost:8080').then(response => {
+        return response.json()
+      }).then(data => {
+
+        if (cpu.length === 11 && mem.length === 11) {
+          cpu.shift()
+          cpu.shift()
+          mem.shift()
+          mem.shift()
+
+          cpu.unshift('CPU')
+          mem.unshift('MEM')
+        }
+        cpu.push(data.cpu)
+        mem.push(data.mem)
+
+        chartCPU.load({
+          columns: [
+            cpu
+          ]
+        })
+
+        chartMEM.load({
+          columns: [
+            mem
+          ]
+        })
+      })
+    }, 3000)
+  </script>
+</body>
+
+</html>
