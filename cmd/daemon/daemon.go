@@ -22,16 +22,18 @@ func main() {
 		})
 	})
 
-	e.GET("/get/all", func(c echo.Context) error {
+	e.GET("/ping", func(c echo.Context) error {
+		return c.JSON(http.StatusOK, map[string]interface{}{
+			"message": "pong",
+		})
+	})
+
+	e.GET("/stats/all", func(c echo.Context) error {
 		return c.JSON(http.StatusOK, s.AllStats(cli))
 	})
 
-	e.GET("/get/:id", func(c echo.Context) error {
+	e.GET("/stats/:id", func(c echo.Context) error {
 		return c.JSON(http.StatusOK, s.Stats(cli, c.Param("id")))
-	})
-
-	e.Any("*", func(c echo.Context) error {
-		return c.String(http.StatusNotFound, "page not found")
 	})
 
 	e.Use(middleware.CORS())

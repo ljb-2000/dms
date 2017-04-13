@@ -1,5 +1,6 @@
-let interval = null
-let intervalTimeOut = 3000
+let interval = null,
+  intervalTimeOut = 3000,
+  apiHost = 'http://localhost:8080/stats/'
 
 function showOneChart() {
   let id = document.getElementById('containerID')
@@ -12,6 +13,8 @@ function showOneChart() {
 }
 
 function clearCharts() {
+  changeServerStatus('none')
+
   let elements = document.getElementsByClassName("temp")
 
   for (let i = elements.length - 1; i >= 0; i--) {
@@ -52,12 +55,12 @@ function allContainers() {
     times = []
 
   return setInterval(function() {
-    fetch('http://localhost:8080/get/all').then(response => {
+    fetch(apiHost + '/all').then(response => {
       return response.json()
     }).then(data => {
       if (isFirst) {
         for (let i = 0; i < data.length; i++) {
-          createChartDiv(document.getElementById('wrapper'), i, data[i].Name)
+          createChartDiv(document.getElementById('chart'), i, data[i].Name)
 
           cpus.push(['cpu'])
           mems.push(['mem'])
@@ -85,6 +88,10 @@ function allContainers() {
           columns: [times[i], cpus[i], mems[i]]
         })
       }
+
+      changeServerStatus('ok')
+    }).catch(function(error) {
+      changeServerStatus('error', error)
     })
   }, intervalTimeOut)
 }
@@ -132,7 +139,7 @@ function oneContainer(id) {
     time = ['time']
 
   return setInterval(function() {
-    fetch('http://localhost:8080/get/' + id).then(response => {
+    fetch(apiHost + id).then(response => {
       return response.json()
     }).then(data => {
       cpu = setCPU(cpu, data)
@@ -140,7 +147,7 @@ function oneContainer(id) {
       time = setTime(time)
 
       if (isFirstChart) {
-        createChartDiv(document.getElementById('wrapper'), 0, data.Name)
+        createChartDiv(document.getElementById('chart'), 0, data.Name)
 
         chart = createChart('chart0', time, cpu, mem)
 
@@ -151,8 +158,25 @@ function oneContainer(id) {
       chart.load({
         columns: [time, cpu, mem]
       })
+
+      changeServerStatus('ok')
+    }).catch(function(error) {
+      changeServerStatus('error', error)
     })
   }, intervalTimeOut)
+}
+
+function changeServerStatus(status, error) {
+  let alert = document.getElementById('alert')
+
+  if (status === 'error') {
+    console.log('error: ', error)
+    alert.setAttribute('class', 'alert alert-danger')
+  } else if (status === 'ok') {
+    alert.setAttribute('class', 'alert alert-success')
+  } else {
+    alert.setAttribute('class', 'none')
+  }
 }
 
 function createChart(id, time, cpu, mem) {
