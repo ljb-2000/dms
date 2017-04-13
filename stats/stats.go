@@ -6,6 +6,7 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/cli/command/formatter"
 	"github.com/docker/docker/client"
+	"math"
 	"strings"
 )
 
@@ -18,7 +19,10 @@ func Stats(ctx context.Context, cli *client.Client, ID string) *formatter.Contai
 
 	dec := json.NewDecoder(stats.Body)
 	var statsJSON *types.StatsJSON
-	dec.Decode(&statsJSON)
+	err = dec.Decode(&statsJSON)
+	if err != nil {
+		panic(err)
+	}
 
 	return convert(statsJSON)
 }
@@ -48,6 +52,10 @@ func convert(statsJSON *types.StatsJSON) *formatter.ContainerStats {
 
 func memoryToPercentage(statsJSON *types.StatsJSON) float64 {
 	mem := float64(statsJSON.MemoryStats.Usage) / float64(statsJSON.MemoryStats.Limit) * 100.0
+
+	if math.IsNaN(mem) {
+		return 0
+	}
 	return mem
 }
 
