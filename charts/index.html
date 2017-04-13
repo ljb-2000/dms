@@ -11,65 +11,60 @@
 </head>
 
 <body>
-  <div id="chartCPU"></div>
-  <div id="chartMEM"></div>
+  <input id="containerID" type="text" />
+  <button onclick="get()">RUN</button>
+
+  <div id="chartName"></div>
+  <div id="chart"></div>
 
   <script>
-    var chartCPU = c3.generate({
-      bindto: '#chartCPU',
-      data: {
-        columns: []
-      },
-      axis: {
-        x: {
-          max: 9
-        },
-        y: {
-          tick: {
-            format: d3.format(',.1f')
-          }
-        }
-      },
-      grid: {
-        x: {
-          show: true
-        },
-        y: {
-          show: true
-        }
-      }
-    })
+    let id = 0, chart = null, first = true
 
-    var chartMEM = c3.generate({
-      bindto: '#chartMEM',
-      data: {
-        columns: []
-      },
-      axis: {
-        x: {
-          max: 9
+    function get() {
+      id = document.getElementById("containerID").value
+    }
+
+    function createChart(cpu, mem) {
+      chart = c3.generate({
+        bindto: '#chart',
+        data: {
+          columns: [
+            cpu,
+            mem
+          ]
         },
-        y: {
-          tick: {
-            format: d3.format(',.1f')
+        axis: {
+          x: {
+            max: 9
+          },
+          y: {
+            tick: {
+              format: d3.format(',.2f')
+            }
+          }
+        },
+        grid: {
+          x: {
+            show: true
+          },
+          y: {
+            show: true
           }
         }
-      },
-      grid: {
-        x: {
-          show: true
-        },
-        y: {
-          show: true
-        }
-      }
-    })
+      })
+    }
 
     let cpu = ['CPU']
     let mem = ['MEM']
 
+    let name = document.getElementById("chartName")
+
     setInterval(function () {
-      fetch('http://localhost:8080/splines').then(response => {
+      if (id === 0) {
+        return
+      }
+
+      fetch('http://localhost:8080/get/' + id).then(response => {
         return response.json()
       }).then(data => {
 
@@ -85,14 +80,18 @@
         cpu.push(data.cpu)
         mem.push(data.mem)
 
-        chartCPU.load({
-          columns: [
-            cpu
-          ]
-        })
+        name.innerText = 'Container name: ' + data.name
 
-        chartMEM.load({
+        if (first) {
+          createChart(cpu, mem)
+
+          first = false
+          return
+        }
+
+        chart.load({
           columns: [
+            cpu,
             mem
           ]
         })

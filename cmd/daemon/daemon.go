@@ -23,13 +23,18 @@ func main() {
 		})
 	})
 
-	e.GET("/:id", func(c echo.Context) error {
+	e.GET("/get/:id", func(c echo.Context) error {
 		stats := s.Stats(context.Background(), cli, c.Param("id"))
 
 		return c.JSON(http.StatusOK, map[string]interface{}{
-			"cpu": stats.GetStatistics().CPUPercentage,
-			"mem": stats.GetStatistics().MemoryPercentage,
+			"cpu":  stats.GetStatistics().CPUPercentage,
+			"mem":  stats.GetStatistics().MemoryPercentage,
+			"name": stats.GetStatistics().Name,
 		})
+	})
+
+	e.Any("*", func(c echo.Context) error {
+		return c.String(http.StatusNotFound, "page not found")
 	})
 
 	e.Use(middleware.CORS())
