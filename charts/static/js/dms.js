@@ -1,6 +1,5 @@
-
 let interval = null
-let intervalTimeOut = 2000
+let intervalTimeOut = 1000
 
 function showOneChart() {
   clearInterval(interval)
@@ -19,6 +18,7 @@ function clearCharts() {
 
 function stop() {
   clearInterval(interval)
+  clearCharts()
 }
 
 function showAllCharts() {
@@ -27,27 +27,33 @@ function showAllCharts() {
   interval = allContainers()
 }
 
+function createChartDiv(parent, i, name) {
+  let h2 = document.createElement('h2')
+  h2.innerText = name
+  h2.setAttribute('class', 'temp')
+  parent.appendChild(h2)
+
+  let div = document.createElement('div')
+  div.setAttribute('id', 'chart' + i);
+  div.setAttribute('class', 'temp');
+  parent.appendChild(div)
+}
+
 function allContainers() {
-  let parent = document.getElementById('wrapper')
-  let div = null
   let isFirst = true
   let charts = []
   let cpus = []
   let mems = []
 
-  return setInterval(function () {
+  return setInterval(function() {
     fetch('http://localhost:8080/get/all').then(response => {
       return response.json()
     }).then(data => {
       if (isFirst) {
         for (let i = 0; i < data.length; i++) {
-          // уменьшить код
-          div = document.createElement('div')
-          div.setAttribute('id', 'chart' + i);
-          div.setAttribute('class', 'temp');
-          parent.appendChild(div)
-          charts.push(createChart('chart' + i, data[i].CPUPercentage, data[i].MemoryPercentage))
+          createChartDiv(document.getElementById('wrapper'), i, data[i].Name)
 
+          charts.push(createChart('chart' + i, data[i].CPUPercentage, data[i].MemoryPercentage))
           cpus.push(['CPU'])
           mems.push(['MEM'])
         }
@@ -83,22 +89,8 @@ function oneContainer() {
   let cpu = ['CPU']
   let mem = ['MEM']
   let id = document.getElementById('containerID').value
-  let chart = null
 
-  // уменьшить код
-  let parent = document.getElementById('wrapper')
-  let element = document.createElement('h2')
-  element.setAttribute('id', 'containerName')
-  element.setAttribute('class', 'temp')
-  parent.appendChild(element)
-  element = document.createElement('div')
-  element.setAttribute('id', 'chart')
-  element.setAttribute('class', 'temp')
-  parent.appendChild(element)
-
-  let name = document.getElementById('containerName')
-
-  return setInterval(function () {
+  return setInterval(function() {
     fetch('http://localhost:8080/get/' + id).then(response => {
       return response.json()
     }).then(data => {
@@ -114,10 +106,10 @@ function oneContainer() {
       cpu.push(data.CPUPercentage)
       mem.push(data.MemoryPercentage)
 
-      name.innerText = data.Name
-
       if (isFirstChart) {
-        chart = createChart('chart', cpu, mem)
+        createChartDiv(document.getElementById('wrapper'), 0, data.Name)
+
+        chart = createChart('chart0', cpu, mem)
 
         isFirstChart = false
         return
