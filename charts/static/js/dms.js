@@ -1,5 +1,5 @@
 let interval = null
-let intervalTimeOut = 1000
+let intervalTimeOut = 3000
 
 function showOneChart() {
   let id = document.getElementById('containerID')
@@ -13,6 +13,7 @@ function showOneChart() {
 
 function clearCharts() {
   let elements = document.getElementsByClassName("temp")
+
   for (let i = elements.length - 1; i >= 0; i--) {
     if (elements[i] && elements[i].parentElement) {
       elements[i].parentElement.removeChild(elements[i])
@@ -44,10 +45,11 @@ function createChartDiv(parent, i, name) {
 }
 
 function allContainers() {
-  let isFirst = true
-  let charts = []
-  let cpus = []
-  let mems = []
+  let isFirst = true,
+    charts = [],
+    cpus = [],
+    mems = [],
+    times = []
 
   return setInterval(function() {
     fetch('http://localhost:8080/get/all').then(response => {
@@ -57,62 +59,85 @@ function allContainers() {
         for (let i = 0; i < data.length; i++) {
           createChartDiv(document.getElementById('wrapper'), i, data[i].Name)
 
-          charts.push(createChart('chart' + i, data[i].CPUPercentage, data[i].MemoryPercentage))
-          cpus.push(['CPU'])
-          mems.push(['MEM'])
+          cpus.push(['cpu'])
+          mems.push(['mem'])
+          times.push(['time'])
+
+          cpus[i] = setCPU(cpus[i], data[i])
+          mems[i] = setMEM(mems[i], data[i])
+          times[i] = setTime(times[i])
+
+          charts.push(createChart('chart' + i, times[i], cpus[i], mems[i]))
         }
 
         isFirst = false
+
+        console.log(cpus)
+        return
       }
 
       for (let i = 0; i < data.length; i++) {
-        if (cpus[i].length === 11 && mems[i].length === 11) {
-          cpus[i].shift()
-          cpus[i].shift()
-          mems[i].shift()
-          mems[i].shift()
+        cpus[i] = setCPU(cpus[i], data[i])
+        mems[i] = setMEM(mems[i], data[i])
+        times[i] = setTime(times[i])
 
-          cpus[i].unshift('CPU')
-          mems[i].unshift('MEM')
-        }
-        cpus[i].push(data[i].CPUPercentage)
-        mems[i].push(data[i].MemoryPercentage)
-      }
-
-      for (let i = 0; i < data.length; i++) {
         charts[i].load({
-          columns: [cpus[i], mems[i]]
+          columns: [times[i], cpus[i], mems[i]]
         })
       }
     })
   }, intervalTimeOut)
 }
 
+function setCPU(cpu, data) {
+  if (cpu.length === 11) {
+    cpu.shift()
+    cpu.shift()
+
+    cpu.unshift('cpu')
+  }
+  cpu.push(data.CPUPercentage)
+
+  return cpu
+}
+
+function setMEM(mem, data) {
+  if (mem.length === 11) {
+    mem.shift()
+    mem.shift()
+
+    mem.unshift('mem')
+  }
+  mem.push(data.MemoryPercentage)
+
+  return mem
+}
+
+function setTime(time) {
+  if (time.length === 11) {
+    time.shift()
+    time.shift()
+
+    time.unshift('time')
+  }
+  time.push(new Date())
+
+  return time
+}
+
 function oneContainer(id) {
-  let isFirstChart = true
-  let cpu = ['CPU']
-  let mem = ['MEM']
-  let time = ['time']
+  let isFirstChart = true,
+    cpu = ['cpu'],
+    mem = ['mem'],
+    time = ['time']
 
   return setInterval(function() {
     fetch('http://localhost:8080/get/' + id).then(response => {
       return response.json()
     }).then(data => {
-      if (cpu.length === 11 && mem.length === 11) {
-        cpu.shift()
-        cpu.shift()
-        mem.shift()
-        mem.shift()
-        time.shift()
-        time.shift()
-
-        cpu.unshift('CPU')
-        mem.unshift('MEM')
-        time.unshift('time')
-      }
-      cpu.push(data.CPUPercentage)
-      mem.push(data.MemoryPercentage)
-      time.push(new Date())
+      cpu = setCPU(cpu, data)
+      mem = setMEM(mem, data)
+      time = setTime(time)
 
       if (isFirstChart) {
         createChartDiv(document.getElementById('wrapper'), 0, data.Name)
