@@ -5,16 +5,13 @@ let interval = null,
 function showOneChart() {
   let id = document.getElementById('containerID')
 
-  clearInterval(interval)
-  clearCharts()
+  stop()
   interval = oneContainer(id.value)
 
   id.value = ''
 }
 
 function clearCharts() {
-  changeServerStatus('none')
-
   let elements = document.getElementsByClassName("temp")
 
   for (let i = elements.length - 1; i >= 0; i--) {
@@ -30,8 +27,7 @@ function stop() {
 }
 
 function showAllCharts() {
-  clearInterval(interval)
-  clearCharts()
+  stop()
   interval = allContainers()
 }
 
@@ -55,7 +51,7 @@ function allContainers() {
     times = []
 
   return setInterval(function() {
-    fetch(apiHost + '/all').then(response => {
+    fetch(apiHost + 'all').then(response => {
       return response.json()
     }).then(data => {
       if (isFirst) {
@@ -75,7 +71,7 @@ function allContainers() {
 
         isFirst = false
 
-        console.log(cpus)
+        changeServerStatus('ok')
         return
       }
 
@@ -152,6 +148,7 @@ function oneContainer(id) {
         chart = createChart('chart0', time, cpu, mem)
 
         isFirstChart = false
+        changeServerStatus('ok')
         return
       }
 
@@ -172,11 +169,9 @@ function changeServerStatus(status, error) {
   if (status === 'error') {
     console.log('error: ', error)
     alert.setAttribute('class', 'alert alert-danger')
-  } else if (status === 'ok') {
-    alert.setAttribute('class', 'alert alert-success')
-  } else {
-    alert.setAttribute('class', 'none')
+    return
   }
+  alert.setAttribute('class', 'alert alert-success')
 }
 
 function createChart(id, time, cpu, mem) {
