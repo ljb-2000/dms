@@ -69,7 +69,7 @@
     let mem = ['MEM']
 
     setInterval(function () {
-      fetch('http://localhost:8080').then(response => {
+      fetch('http://localhost:8080/splines').then(response => {
         return response.json()
       }).then(data => {
 

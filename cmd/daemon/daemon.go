@@ -3,33 +3,38 @@ package main
 import (
 	"context"
 	"github.com/docker/docker/client"
+	"github.com/labstack/echo"
+	"github.com/labstack/echo/middleware"
 	s "github.com/lavrs/docker-monitoring-service/stats"
-	"gopkg.in/gin-gonic/gin.v1"
+	"net/http"
 )
 
 func main() {
-	r := gin.Default()
+	e := echo.New()
 
 	cli, err := client.NewEnvClient()
 	if err != nil {
 		panic(err)
 	}
 
-	r.GET("/", func(c *gin.Context) {
-		stats := s.Stats(context.Background(), cli, "splines")
-
-		c.Header("Access-Control-Allow-Origin", "*")
-		c.JSON(200, gin.H{
-			"cpu": stats.CPUPercentage,
-			"mem": stats.MemoryPercentage,
+	e.GET("/", func(c echo.Context) error {
+		return c.JSON(http.StatusOK, map[string]interface{}{
+			"status": "OK",
 		})
 	})
 
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "pong",
+	e.GET("/:id", func(c echo.Context) error {
+		stats := s.Stats(context.Background(), cli, c.Param("id"))
+
+		return c.JSON(http.StatusOK, map[string]interface{}{
+			"cpu": stats.GetStatistics().CPUPercentage,
+			"mem": stats.GetStatistics().MemoryPercentage,
 		})
 	})
 
-	r.Run()
+	e.Use(middleware.CORS())
+	e.Use(middleware.Logger())
+	e.Use(middleware.Recover())
+
+	e.Logger.Fatal(e.Start(":8080"))
 }
