@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"github.com/docker/docker/client"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
@@ -23,14 +22,12 @@ func main() {
 		})
 	})
 
-	e.GET("/get/:id", func(c echo.Context) error {
-		stats := s.Stats(context.Background(), cli, c.Param("id"))
+	e.GET("/get/all", func(c echo.Context) error {
+		return c.JSON(http.StatusOK, s.AllStats(cli))
+	})
 
-		return c.JSON(http.StatusOK, map[string]interface{}{
-			"cpu":  stats.GetStatistics().CPUPercentage,
-			"mem":  stats.GetStatistics().MemoryPercentage,
-			"name": stats.GetStatistics().Name,
-		})
+	e.GET("/get/:id", func(c echo.Context) error {
+		return c.JSON(http.StatusOK, s.Stats(cli, c.Param("id")))
 	})
 
 	e.Any("*", func(c echo.Context) error {

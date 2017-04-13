@@ -10,8 +10,23 @@ import (
 	"strings"
 )
 
-func Stats(ctx context.Context, cli *client.Client, ID string) *formatter.ContainerStats {
-	stats, err := cli.ContainerStats(ctx, ID, true)
+func AllStats(cli *client.Client) *[]*formatter.ContainerStats {
+	containers, err := cli.ContainerList(context.Background(), types.ContainerListOptions{})
+	if err != nil {
+		panic(err)
+	}
+
+	var statss []*formatter.ContainerStats
+
+	for _, container := range containers {
+		statss = append(statss, Stats(cli, container.ID))
+	}
+
+	return &statss
+}
+
+func Stats(cli *client.Client, ID string) *formatter.ContainerStats {
+	stats, err := cli.ContainerStats(context.Background(), ID, true)
 	if err != nil {
 		panic(err)
 	}

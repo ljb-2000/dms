@@ -57,10 +57,10 @@ function work() {
         cpu.unshift('CPU')
         mem.unshift('MEM')
       }
-      cpu.push(data.cpu)
-      mem.push(data.mem)
+      cpu.push(data.CPUPercentage)
+      mem.push(data.MemoryPercentage)
 
-      name.innerText = data.name
+      name.innerText = data.Name
 
       if (first) {
         createChart(cpu, mem)
