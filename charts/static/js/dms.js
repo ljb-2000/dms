@@ -3,18 +3,16 @@ let interval = null
 let intervalTimeOut = 2000
 
 function showOneChart() {
-  clearCharts()
   clearInterval(interval)
+  clearCharts()
   interval = oneContainer()
 }
 
 function clearCharts() {
   let elements = document.getElementsByClassName("temp")
-  console.log(elements.length)
-  if (elements.length !== 0) {
-    for (let i = 0; i < elements.length; i++) {
-      console.log('lal')
-      elements[i].remove()
+  for (let i = elements.length - 1; i >= 0; i--) {
+    if (elements[i] && elements[i].parentElement) {
+      elements[i].parentElement.removeChild(elements[i])
     }
   }
 }
@@ -24,8 +22,8 @@ function stop() {
 }
 
 function showAllCharts() {
-  clearCharts()
   clearInterval(interval)
+  clearCharts()
   interval = allContainers()
 }
 
@@ -43,6 +41,7 @@ function allContainers() {
     }).then(data => {
       if (isFirst) {
         for (let i = 0; i < data.length; i++) {
+          // уменьшить код
           div = document.createElement('div')
           div.setAttribute('id', 'chart' + i);
           div.setAttribute('class', 'temp');
@@ -86,6 +85,7 @@ function oneContainer() {
   let id = document.getElementById('containerID').value
   let chart = null
 
+  // уменьшить код
   let parent = document.getElementById('wrapper')
   let element = document.createElement('h2')
   element.setAttribute('id', 'containerName')
