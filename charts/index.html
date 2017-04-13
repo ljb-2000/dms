@@ -12,17 +12,16 @@
 </head>
 
 <body>
-  <div class="container">
+  <div id="wrapper" class="container">
 
     <div class="input-group">
 
       <input id="containerID" type="text" class="form-control" placeholder="container name" />
-      <button class="btn btn-primary" onclick="newContainer()">GO</button>
+      <button class="btn btn-primary" onclick="showOneChart()">GO</button>
+      <button class="btn btn-primary" onclick="showAllCharts()">ALL</button>
+      <button class="btn btn-primary" onclick="stop()">STOP</button>
 
     </div>
-
-    <h2 id="containerName"></h2>
-    <div id="chart"></div>
 
   </div>
 

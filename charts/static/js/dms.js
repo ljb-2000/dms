@@ -1,13 +1,138 @@
 
-let id = 0, chart = null, first = true
+let interval = null
+let intervalTimeOut = 2000
 
-function newContainer() {
-  id = document.getElementById("containerID").value
+function showOneChart() {
+  clearCharts()
+  clearInterval(interval)
+  interval = oneContainer()
 }
 
-function createChart(cpu, mem) {
-  chart = c3.generate({
-    bindto: '#chart',
+function clearCharts() {
+  let elements = document.getElementsByClassName("temp")
+  console.log(elements.length)
+  if (elements.length !== 0) {
+    for (let i = 0; i < elements.length; i++) {
+      console.log('lal')
+      elements[i].remove()
+    }
+  }
+}
+
+function stop() {
+  clearInterval(interval)
+}
+
+function showAllCharts() {
+  clearCharts()
+  clearInterval(interval)
+  interval = allContainers()
+}
+
+function allContainers() {
+  let parent = document.getElementById('wrapper')
+  let div = null
+  let isFirst = true
+  let charts = []
+  let cpus = []
+  let mems = []
+
+  return setInterval(function () {
+    fetch('http://localhost:8080/get/all').then(response => {
+      return response.json()
+    }).then(data => {
+      if (isFirst) {
+        for (let i = 0; i < data.length; i++) {
+          div = document.createElement('div')
+          div.setAttribute('id', 'chart' + i);
+          div.setAttribute('class', 'temp');
+          parent.appendChild(div)
+          charts.push(createChart('chart' + i, data[i].CPUPercentage, data[i].MemoryPercentage))
+
+          cpus.push(['CPU'])
+          mems.push(['MEM'])
+        }
+
+        isFirst = false
+      }
+
+      for (let i = 0; i < data.length; i++) {
+        if (cpus[i].length === 11 && mems[i].length === 11) {
+          cpus[i].shift()
+          cpus[i].shift()
+          mems[i].shift()
+          mems[i].shift()
+
+          cpus[i].unshift('CPU')
+          mems[i].unshift('MEM')
+        }
+        cpus[i].push(data[i].CPUPercentage)
+        mems[i].push(data[i].MemoryPercentage)
+      }
+
+      for (let i = 0; i < data.length; i++) {
+        charts[i].load({
+          columns: [cpus[i], mems[i]]
+        })
+      }
+    })
+  }, intervalTimeOut)
+}
+
+function oneContainer() {
+  let isFirstChart = true
+  let cpu = ['CPU']
+  let mem = ['MEM']
+  let id = document.getElementById('containerID').value
+  let chart = null
+
+  let parent = document.getElementById('wrapper')
+  let element = document.createElement('h2')
+  element.setAttribute('id', 'containerName')
+  element.setAttribute('class', 'temp')
+  parent.appendChild(element)
+  element = document.createElement('div')
+  element.setAttribute('id', 'chart')
+  element.setAttribute('class', 'temp')
+  parent.appendChild(element)
+
+  let name = document.getElementById('containerName')
+
+  return setInterval(function () {
+    fetch('http://localhost:8080/get/' + id).then(response => {
+      return response.json()
+    }).then(data => {
+      if (cpu.length === 11 && mem.length === 11) {
+        cpu.shift()
+        cpu.shift()
+        mem.shift()
+        mem.shift()
+
+        cpu.unshift('CPU')
+        mem.unshift('MEM')
+      }
+      cpu.push(data.CPUPercentage)
+      mem.push(data.MemoryPercentage)
+
+      name.innerText = data.Name
+
+      if (isFirstChart) {
+        chart = createChart('chart', cpu, mem)
+
+        isFirstChart = false
+        return
+      }
+
+      chart.load({
+        columns: [cpu, mem]
+      })
+    })
+  }, intervalTimeOut)
+}
+
+function createChart(id, cpu, mem) {
+  return chart = c3.generate({
+    bindto: '#' + id,
     data: {
       columns: [
         cpu,
@@ -34,49 +159,3 @@ function createChart(cpu, mem) {
     }
   })
 }
-
-function work() {
-  let cpu = ['CPU']
-  let mem = ['MEM']
-  let name = document.getElementById("containerName")
-
-  setInterval(function () {
-    if (id === 0) {
-      return
-    }
-
-    fetch('http://localhost:8080/get/' + id).then(response => {
-      return response.json()
-    }).then(data => {
-      if (cpu.length === 11 && mem.length === 11) {
-        cpu.shift()
-        cpu.shift()
-        mem.shift()
-        mem.shift()
-
-        cpu.unshift('CPU')
-        mem.unshift('MEM')
-      }
-      cpu.push(data.CPUPercentage)
-      mem.push(data.MemoryPercentage)
-
-      name.innerText = data.Name
-
-      if (first) {
-        createChart(cpu, mem)
-
-        first = false
-        return
-      }
-
-      chart.load({
-        columns: [
-          cpu,
-          mem
-        ]
-      })
-    })
-  }, 3000)
-}
-
-work()
