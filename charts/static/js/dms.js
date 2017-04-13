@@ -2,9 +2,13 @@ let interval = null
 let intervalTimeOut = 1000
 
 function showOneChart() {
+  let id = document.getElementById('containerID')
+
   clearInterval(interval)
   clearCharts()
-  interval = oneContainer()
+  interval = oneContainer(id.value)
+
+  id.value = ''
 }
 
 function clearCharts() {
@@ -84,11 +88,11 @@ function allContainers() {
   }, intervalTimeOut)
 }
 
-function oneContainer() {
+function oneContainer(id) {
   let isFirstChart = true
   let cpu = ['CPU']
   let mem = ['MEM']
-  let id = document.getElementById('containerID').value
+  let time = ['time']
 
   return setInterval(function() {
     fetch('http://localhost:8080/get/' + id).then(response => {
@@ -99,41 +103,50 @@ function oneContainer() {
         cpu.shift()
         mem.shift()
         mem.shift()
+        time.shift()
+        time.shift()
 
         cpu.unshift('CPU')
         mem.unshift('MEM')
+        time.unshift('time')
       }
       cpu.push(data.CPUPercentage)
       mem.push(data.MemoryPercentage)
+      time.push(new Date())
 
       if (isFirstChart) {
         createChartDiv(document.getElementById('wrapper'), 0, data.Name)
 
-        chart = createChart('chart0', cpu, mem)
+        chart = createChart('chart0', time, cpu, mem)
 
         isFirstChart = false
         return
       }
 
       chart.load({
-        columns: [cpu, mem]
+        columns: [time, cpu, mem]
       })
     })
   }, intervalTimeOut)
 }
 
-function createChart(id, cpu, mem) {
+function createChart(id, time, cpu, mem) {
   return chart = c3.generate({
     bindto: '#' + id,
     data: {
+      x: 'time',
       columns: [
+        time,
         cpu,
         mem
       ]
     },
     axis: {
       x: {
-        max: 9
+        type: 'timeseries',
+        tick: {
+          format: '%H:%M:%S'
+        },
       },
       y: {
         tick: {
