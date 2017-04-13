@@ -5,99 +5,28 @@
   <title>Charts</title>
 
   <link href="./static/css/c3.min.css" rel="stylesheet" type="text/css">
+  <link href="./static/css/bootstrap.min.css" rel="stylesheet" type="text/css">
 
   <script src="./static/js/d3.min.js"></script>
   <script src="./static/js/c3.min.js"></script>
 </head>
 
 <body>
-  <input id="containerID" type="text" />
-  <button onclick="get()">RUN</button>
+  <div class="container">
 
-  <div id="chartName"></div>
-  <div id="chart"></div>
+    <div class="input-group">
 
-  <script>
-    let id = 0, chart = null, first = true
+      <input id="containerID" type="text" class="form-control" placeholder="container name" />
+      <button class="btn btn-primary" onclick="newContainer()">GO</button>
 
-    function get() {
-      id = document.getElementById("containerID").value
-    }
+    </div>
 
-    function createChart(cpu, mem) {
-      chart = c3.generate({
-        bindto: '#chart',
-        data: {
-          columns: [
-            cpu,
-            mem
-          ]
-        },
-        axis: {
-          x: {
-            max: 9
-          },
-          y: {
-            tick: {
-              format: d3.format(',.2f')
-            }
-          }
-        },
-        grid: {
-          x: {
-            show: true
-          },
-          y: {
-            show: true
-          }
-        }
-      })
-    }
+    <h2 id="containerName"></h2>
+    <div id="chart"></div>
 
-    let cpu = ['CPU']
-    let mem = ['MEM']
+  </div>
 
-    let name = document.getElementById("chartName")
-
-    setInterval(function () {
-      if (id === 0) {
-        return
-      }
-
-      fetch('http://localhost:8080/get/' + id).then(response => {
-        return response.json()
-      }).then(data => {
-
-        if (cpu.length === 11 && mem.length === 11) {
-          cpu.shift()
-          cpu.shift()
-          mem.shift()
-          mem.shift()
-
-          cpu.unshift('CPU')
-          mem.unshift('MEM')
-        }
-        cpu.push(data.cpu)
-        mem.push(data.mem)
-
-        name.innerText = 'Container name: ' + data.name
-
-        if (first) {
-          createChart(cpu, mem)
-
-          first = false
-          return
-        }
-
-        chart.load({
-          columns: [
-            cpu,
-            mem
-          ]
-        })
-      })
-    }, 3000)
-  </script>
+  <script src="./static/js/dms.js"></script>
 </body>
 
 </html>
