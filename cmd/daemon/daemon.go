@@ -29,7 +29,7 @@ func main() {
 	})
 
 	e.GET("/stats/:id", func(c echo.Context) error {
-		stats, err := s.Stats(cli, c.Param("id"))
+		stats, err := s.GetStats(cli, c.Param("id"))
 		if err != nil {
 			return c.JSON(http.StatusOK, map[string]interface{}{
 				"error": err.Error(),

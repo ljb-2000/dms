@@ -1,17 +1,13 @@
-let interval = null,
-  intervalTimeOut = 3000,
-  apiHost = 'http://localhost:8080/stats/'
+let interval = null
 
-function showChart(type) {
-  if (type) {
+function show(isAllContainers) {
+  if (isAllContainers) {
     stop()
-    interval = oneOrMoreContainers('all')
+    interval = showCharts('all')
   } else {
     let id = document.getElementById('containerID')
-
     stop()
-    interval = oneOrMoreContainers(id.value)
-
+    interval = showCharts(id.value)
     id.value = ''
   }
 }
@@ -32,11 +28,6 @@ function stop() {
   clearCharts()
 }
 
-function showAllCharts() {
-  stop()
-  interval = allContainers()
-}
-
 function createChartDiv(parent, name) {
   let h2 = document.createElement('h2')
   h2.innerText = name
@@ -49,7 +40,7 @@ function createChartDiv(parent, name) {
   parent.appendChild(div)
 }
 
-function oneOrMoreContainers(id) {
+function showCharts(id) {
   let isFirst = true,
     charts = [],
     cpus = [],
@@ -57,7 +48,7 @@ function oneOrMoreContainers(id) {
     times = []
 
   return setInterval(function() {
-    fetch(apiHost + id).then(response => {
+    fetch('http://localhost:8080/stats/' + id).then(response => {
       return response.json()
     }).then(data => {
       if (data.error != undefined) {
@@ -73,23 +64,22 @@ function oneOrMoreContainers(id) {
           mems.push(['mem'])
           times.push(['time'])
 
-          cpus[i] = setCPU(cpus[i], data[i])
-          mems[i] = setMEM(mems[i], data[i])
-          times[i] = setTime(times[i])
+          cpus[i] = setData(cpus[i], 'cpu', data[i].CPUPercentage)
+          mems[i] = setData(mems[i], 'mem', data[i].MemoryPercentage)
+          times[i] = setData(times[i], 'time', new Date())
 
           charts.push(createChart(data[i].Name, times[i], cpus[i], mems[i]))
         }
 
         isFirst = false
-
         changeServerStatus('200')
         return
       }
 
       for (let i = 0; i < data.length; i++) {
-        cpus[i] = setCPU(cpus[i], data[i])
-        mems[i] = setMEM(mems[i], data[i])
-        times[i] = setTime(times[i])
+        cpus[i] = setData(cpus[i], 'cpu', data[i].CPUPercentage)
+        mems[i] = setData(mems[i], 'mem', data[i].MemoryPercentage)
+        times[i] = setData(times[i], 'time', new Date())
 
         charts[i].load({
           columns: [times[i], cpus[i], mems[i]]
@@ -100,43 +90,18 @@ function oneOrMoreContainers(id) {
     }).catch(error => {
       changeServerStatus('500', error, false)
     })
-  }, intervalTimeOut)
+  }, 1000)
 }
 
-function setCPU(cpu, data) {
-  if (cpu.length === 11) {
-    cpu.shift()
-    cpu.shift()
-
-    cpu.unshift('cpu')
+function setData(data, dataType, apiData) {
+  if (data.length === 25) {
+    data.shift()
+    data.shift()
+    data.unshift(dataType)
   }
-  cpu.push(data.CPUPercentage)
+  data.push(apiData)
 
-  return cpu
-}
-
-function setMEM(mem, data) {
-  if (mem.length === 11) {
-    mem.shift()
-    mem.shift()
-
-    mem.unshift('mem')
-  }
-  mem.push(data.MemoryPercentage)
-
-  return mem
-}
-
-function setTime(time) {
-  if (time.length === 11) {
-    time.shift()
-    time.shift()
-
-    time.unshift('time')
-  }
-  time.push(new Date())
-
-  return time
+  return data
 }
 
 function changeServerStatus(status, error, isAlert) {
@@ -145,6 +110,7 @@ function changeServerStatus(status, error, isAlert) {
 
   if (status === '500') {
     console.log('error: ', error)
+
     alertStatus.innerText = '500'
     alertStatus.setAttribute('class', 'alert alert-danger')
 
@@ -154,12 +120,15 @@ function changeServerStatus(status, error, isAlert) {
 
     alertErrorText.innerText = error
     alertErrorText.setAttribute('class', 'alert alert-danger temp')
+
     return
   } else if (status === '404') {
     alertStatus.innerText = '404'
     alertStatus.setAttribute('class', 'alert alert-warning')
+
     return
   }
+
   alertStatus.innerText = '200'
   alertStatus.setAttribute('class', 'alert alert-success')
 }
@@ -180,7 +149,7 @@ function createChart(id, time, cpu, mem) {
         type: 'timeseries',
         tick: {
           format: '%H:%M:%S'
-        },
+        }
       },
       y: {
         tick: {

@@ -7,33 +7,31 @@ import (
 	"github.com/docker/docker/cli/command/formatter"
 	"github.com/docker/docker/client"
 	"github.com/pkg/errors"
-	"log"
 	"math"
 	"strings"
 )
 
-func statsMoreThanOne(cli *client.Client, IDs []string) (*[]*formatter.ContainerStats, error) {
-	var statss []*formatter.ContainerStats
+func getMoreThanOne(cli *client.Client, IDs []string) (*[]*formatter.ContainerStats, error) {
+	var res []*formatter.ContainerStats
 
 	for _, ID := range IDs {
-		stats, err := statsOne(cli, ID)
+		oneStats, err := getOne(cli, ID)
 		if err != nil {
 			return nil, err
 		}
 
-		statss = append(statss, stats)
+		res = append(res, oneStats)
 	}
 
-	return &statss, nil
+	return &res, nil
 }
 
-func Stats(cli *client.Client, ID string) (*[]*formatter.ContainerStats, error) {
+func GetStats(cli *client.Client, ID string) (*[]*formatter.ContainerStats, error) {
 	if ID == "all" {
 		containers, err := cli.ContainerList(context.Background(), types.ContainerListOptions{})
 		if err != nil {
 			return nil, err
 		}
-
 		if len(containers) == 0 {
 			return nil, errors.New("no running containers")
 		}
@@ -42,50 +40,48 @@ func Stats(cli *client.Client, ID string) (*[]*formatter.ContainerStats, error) 
 		for _, container := range containers {
 			IDs = append(IDs, container.ID)
 		}
-
-		stats, err := statsMoreThanOne(cli, IDs)
+		res, err := getMoreThanOne(cli, IDs)
 		if err != nil {
 			return nil, err
 		}
-		return stats, nil
+
+		return res, nil
 	} else if strings.Contains(ID, ",") {
 		IDs := strings.Split(strings.Replace(ID, " ", "", -1), ",")
-
-		log.Println(IDs)
-
-		stats, err := statsMoreThanOne(cli, IDs)
+		res, err := getMoreThanOne(cli, IDs)
 		if err != nil {
 			return nil, err
 		}
-		return stats, nil
+
+		return res, nil
 	} else {
-		var statss []*formatter.ContainerStats
+		var res []*formatter.ContainerStats
 
-		stats, err := statsOne(cli, ID)
+		oneStat, err := getOne(cli, ID)
 		if err != nil {
 			return nil, err
 		}
+		res = append(res, oneStat)
 
-		statss = append(statss, stats)
-		return &statss, nil
+		return &res, nil
 	}
 }
 
-func statsOne(cli *client.Client, ID string) (*formatter.ContainerStats, error) {
-	stats, err := cli.ContainerStats(context.Background(), ID, true)
+func getOne(cli *client.Client, ID string) (*formatter.ContainerStats, error) {
+	res, err := cli.ContainerStats(context.Background(), ID, true)
 	if err != nil {
 		return nil, err
 	}
-	defer stats.Body.Close()
+	defer res.Body.Close()
 
-	dec := json.NewDecoder(stats.Body)
-	var statsJSON *types.StatsJSON
-	err = dec.Decode(&statsJSON)
+	dec := json.NewDecoder(res.Body)
+	var resJSON *types.StatsJSON
+	err = dec.Decode(&resJSON)
 	if err != nil {
 		return nil, err
 	}
 
-	return convert(statsJSON), nil
+	return convert(resJSON), nil
 }
 
 func convert(statsJSON *types.StatsJSON) *formatter.ContainerStats {
