@@ -3,71 +3,81 @@ package stats
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/cli/command/formatter"
 	"github.com/docker/docker/client"
-	"github.com/pkg/errors"
 	"math"
 	"strings"
+	"time"
 )
 
-func getMoreThanOne(cli *client.Client, IDs []string) (*[]*formatter.ContainerStats, error) {
-	var res []*formatter.ContainerStats
+var Data = make(map[string]*formatter.ContainerStats)
 
-	for _, ID := range IDs {
-		oneStats, err := getOne(cli, ID)
-		if err != nil {
-			return nil, err
-		}
-
-		res = append(res, oneStats)
+func CollectData() {
+	cli, err := client.NewEnvClient()
+	if err != nil {
+		panic(err)
 	}
 
-	return &res, nil
+	containers, err := cli.ContainerList(context.Background(), types.ContainerListOptions{})
+	if err != nil {
+		panic(err)
+	}
+
+	for _, container := range containers {
+		go collect(cli, container.Names[0][1:])
+	}
 }
 
-func GetStats(cli *client.Client, ID string) (*[]*formatter.ContainerStats, error) {
-	if ID == "all" {
-		containers, err := cli.ContainerList(context.Background(), types.ContainerListOptions{})
+func collect(cli *client.Client, ID string) {
+	for range time.Tick(time.Second) {
+		res, err := getOneStats(cli, ID)
 		if err != nil {
-			return nil, err
+			panic(err)
 		}
-		if len(containers) == 0 {
+
+		Data[ID] = res
+	}
+}
+
+func GetStats(ID string) (*[]*formatter.ContainerStats, error) {
+	var res []*formatter.ContainerStats
+
+	if ID == "all" {
+		if len(Data) == 0 {
 			return nil, errors.New("no running containers")
 		}
 
-		var IDs []string
-		for _, container := range containers {
-			IDs = append(IDs, container.ID)
+		for _, d := range Data {
+			res = append(res, d)
 		}
-		res, err := getMoreThanOne(cli, IDs)
-		if err != nil {
-			return nil, err
-		}
-
-		return res, nil
-	} else if strings.Contains(ID, ",") {
-		IDs := strings.Split(strings.Replace(ID, " ", "", -1), ",")
-		res, err := getMoreThanOne(cli, IDs)
-		if err != nil {
-			return nil, err
-		}
-
-		return res, nil
-	} else {
-		var res []*formatter.ContainerStats
-
-		oneStat, err := getOne(cli, ID)
-		if err != nil {
-			return nil, err
-		}
-		res = append(res, oneStat)
 
 		return &res, nil
+	} else if strings.Contains(ID, ",") {
+		IDs := strings.Split(strings.Replace(ID, " ", "", -1), ",")
+
+		for _, ID := range IDs {
+			if data, ok := Data[ID]; ok {
+				res = append(res, data)
+			} else {
+				return nil, errors.New("there is no such container: " + ID)
+			}
+		}
+
+		return &res, nil
+	} else {
+		if data, ok := Data[ID]; ok {
+			res = append(res, data)
+
+			return &res, nil
+		} else {
+			return nil, errors.New("there is no such container: " + ID)
+		}
 	}
 }
 
-func getOne(cli *client.Client, ID string) (*formatter.ContainerStats, error) {
+func getOneStats(cli *client.Client, ID string) (*formatter.ContainerStats, error) {
 	res, err := cli.ContainerStats(context.Background(), ID, true)
 	if err != nil {
 		return nil, err

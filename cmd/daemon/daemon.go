@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/docker/docker/client"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	s "github.com/lavrs/docker-monitoring-service/stats"
@@ -11,10 +10,7 @@ import (
 func main() {
 	e := echo.New()
 
-	cli, err := client.NewEnvClient()
-	if err != nil {
-		panic(err)
-	}
+	go s.CollectData()
 
 	e.GET("/", func(c echo.Context) error {
 		return c.JSON(http.StatusOK, map[string]interface{}{
@@ -29,12 +25,13 @@ func main() {
 	})
 
 	e.GET("/stats/:id", func(c echo.Context) error {
-		stats, err := s.GetStats(cli, c.Param("id"))
+		stats, err := s.GetStats(c.Param("id"))
 		if err != nil {
 			return c.JSON(http.StatusOK, map[string]interface{}{
 				"error": err.Error(),
 			})
 		}
+
 		return c.JSON(http.StatusOK, stats)
 	})
 

@@ -88,13 +88,13 @@ function showCharts(id) {
 
       changeServerStatus('200')
     }).catch(error => {
-      changeServerStatus('500', error, false)
+      changeServerStatus('500', error, true)
     })
   }, 1000)
 }
 
 function setData(data, dataType, apiData) {
-  if (data.length === 25) {
+  if (data.length === 10) {
     data.shift()
     data.shift()
     data.unshift(dataType)
@@ -114,21 +114,23 @@ function changeServerStatus(status, error, isAlert) {
     alertStatus.innerText = '500'
     alertStatus.setAttribute('class', 'alert alert-danger')
 
-    if (!isAlert) {
+    if (isAlert) {
       return
     }
 
     alertErrorText.innerText = error
-    alertErrorText.setAttribute('class', 'alert alert-danger temp')
+    alertErrorText.setAttribute('class', 'alert alert-danger')
 
     return
   } else if (status === '404') {
     alertStatus.innerText = '404'
     alertStatus.setAttribute('class', 'alert alert-warning')
+    alertErrorText.setAttribute('class', 'none')
 
     return
   }
 
+  alertErrorText.setAttribute('class', 'none')
   alertStatus.innerText = '200'
   alertStatus.setAttribute('class', 'alert alert-success')
 }
