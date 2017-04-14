@@ -2,13 +2,18 @@ let interval = null,
   intervalTimeOut = 3000,
   apiHost = 'http://localhost:8080/stats/'
 
-function showOneChart() {
-  let id = document.getElementById('containerID')
+function showChart(type) {
+  if (type) {
+    stop()
+    interval = oneOrMoreContainers('all')
+  } else {
+    let id = document.getElementById('containerID')
 
-  stop()
-  interval = oneContainer(id.value)
+    stop()
+    interval = oneOrMoreContainers(id.value)
 
-  id.value = ''
+    id.value = ''
+  }
 }
 
 function clearCharts() {
@@ -22,6 +27,7 @@ function clearCharts() {
 }
 
 function stop() {
+  changeServerStatus('404')
   clearInterval(interval)
   clearCharts()
 }
@@ -43,7 +49,7 @@ function createChartDiv(parent, name) {
   parent.appendChild(div)
 }
 
-function allContainers() {
+function oneOrMoreContainers(id) {
   let isFirst = true,
     charts = [],
     cpus = [],
@@ -51,10 +57,9 @@ function allContainers() {
     times = []
 
   return setInterval(function() {
-    fetch(apiHost + 'all').then(response => {
+    fetch(apiHost + id).then(response => {
       return response.json()
     }).then(data => {
-      console.log(data)
       if (data.error != undefined) {
         changeServerStatus('500', data.error)
         return
@@ -92,6 +97,8 @@ function allContainers() {
       }
 
       changeServerStatus('200')
+    }).catch(error => {
+      changeServerStatus('500', error, false)
     })
   }, intervalTimeOut)
 }
@@ -132,45 +139,7 @@ function setTime(time) {
   return time
 }
 
-function oneContainer(id) {
-  let isFirstChart = true,
-    cpu = ['cpu'],
-    mem = ['mem'],
-    time = ['time']
-
-  return setInterval(function() {
-    fetch(apiHost + id).then(response => {
-      return response.json()
-    }).then(data => {
-      if (data.error != undefined) {
-        changeServerStatus('500', data.message)
-        return
-      }
-
-      cpu = setCPU(cpu, data)
-      mem = setMEM(mem, data)
-      time = setTime(time)
-
-      if (isFirstChart) {
-        createChartDiv(document.getElementById('chart'), data.Name)
-
-        chart = createChart(data.Name, time, cpu, mem)
-
-        isFirstChart = false
-        changeServerStatus('200')
-        return
-      }
-
-      chart.load({
-        columns: [time, cpu, mem]
-      })
-
-      changeServerStatus('200')
-    })
-  }, intervalTimeOut)
-}
-
-function changeServerStatus(status, error) {
+function changeServerStatus(status, error, isAlert) {
   let alertStatus = document.getElementById('alert-status')
   let alertErrorText = document.getElementById('alert-error-text')
 
@@ -179,15 +148,20 @@ function changeServerStatus(status, error) {
     alertStatus.innerText = '500'
     alertStatus.setAttribute('class', 'alert alert-danger')
 
+    if (!isAlert) {
+      return
+    }
+
     alertErrorText.innerText = error
-    alertErrorText.setAttribute('class', 'alert alert-danger')
+    alertErrorText.setAttribute('class', 'alert alert-danger temp')
+    return
+  } else if (status === '404') {
+    alertStatus.innerText = '404'
+    alertStatus.setAttribute('class', 'alert alert-warning')
     return
   }
   alertStatus.innerText = '200'
   alertStatus.setAttribute('class', 'alert alert-success')
-
-  alertErrorText.innerText = ''
-  alertErrorText.setAttribute('class', 'none')
 }
 
 function createChart(id, time, cpu, mem) {

@@ -7,24 +7,16 @@ import (
 	"github.com/docker/docker/cli/command/formatter"
 	"github.com/docker/docker/client"
 	"github.com/pkg/errors"
+	"log"
 	"math"
 	"strings"
 )
 
-func StatsAll(cli *client.Client) (*[]*formatter.ContainerStats, error) {
-	containers, err := cli.ContainerList(context.Background(), types.ContainerListOptions{})
-	if err != nil {
-		return nil, err
-	}
-
-	if len(containers) == 0 {
-		return nil, errors.New("no running containers")
-	}
-
+func statsMoreThanOne(cli *client.Client, IDs []string) (*[]*formatter.ContainerStats, error) {
 	var statss []*formatter.ContainerStats
 
-	for _, container := range containers {
-		stats, err := Stats(cli, container.ID)
+	for _, ID := range IDs {
+		stats, err := statsOne(cli, ID)
 		if err != nil {
 			return nil, err
 		}
@@ -35,7 +27,51 @@ func StatsAll(cli *client.Client) (*[]*formatter.ContainerStats, error) {
 	return &statss, nil
 }
 
-func Stats(cli *client.Client, ID string) (*formatter.ContainerStats, error) {
+func Stats(cli *client.Client, ID string) (*[]*formatter.ContainerStats, error) {
+	if ID == "all" {
+		containers, err := cli.ContainerList(context.Background(), types.ContainerListOptions{})
+		if err != nil {
+			return nil, err
+		}
+
+		if len(containers) == 0 {
+			return nil, errors.New("no running containers")
+		}
+
+		var IDs []string
+		for _, container := range containers {
+			IDs = append(IDs, container.ID)
+		}
+
+		stats, err := statsMoreThanOne(cli, IDs)
+		if err != nil {
+			return nil, err
+		}
+		return stats, nil
+	} else if strings.Contains(ID, ",") {
+		IDs := strings.Split(strings.Replace(ID, " ", "", -1), ",")
+
+		log.Println(IDs)
+
+		stats, err := statsMoreThanOne(cli, IDs)
+		if err != nil {
+			return nil, err
+		}
+		return stats, nil
+	} else {
+		var statss []*formatter.ContainerStats
+
+		stats, err := statsOne(cli, ID)
+		if err != nil {
+			return nil, err
+		}
+
+		statss = append(statss, stats)
+		return &statss, nil
+	}
+}
+
+func statsOne(cli *client.Client, ID string) (*formatter.ContainerStats, error) {
 	stats, err := cli.ContainerStats(context.Background(), ID, true)
 	if err != nil {
 		return nil, err
