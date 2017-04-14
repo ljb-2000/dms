@@ -6,29 +6,39 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/cli/command/formatter"
 	"github.com/docker/docker/client"
+	"github.com/pkg/errors"
 	"math"
 	"strings"
 )
 
-func AllStats(cli *client.Client) *[]*formatter.ContainerStats {
+func StatsAll(cli *client.Client) (*[]*formatter.ContainerStats, error) {
 	containers, err := cli.ContainerList(context.Background(), types.ContainerListOptions{})
 	if err != nil {
-		panic(err)
+		return nil, err
+	}
+
+	if len(containers) == 0 {
+		return nil, errors.New("no running containers")
 	}
 
 	var statss []*formatter.ContainerStats
 
 	for _, container := range containers {
-		statss = append(statss, Stats(cli, container.ID))
+		stats, err := Stats(cli, container.ID)
+		if err != nil {
+			return nil, err
+		}
+
+		statss = append(statss, stats)
 	}
 
-	return &statss
+	return &statss, nil
 }
 
-func Stats(cli *client.Client, ID string) *formatter.ContainerStats {
+func Stats(cli *client.Client, ID string) (*formatter.ContainerStats, error) {
 	stats, err := cli.ContainerStats(context.Background(), ID, true)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	defer stats.Body.Close()
 
@@ -36,10 +46,10 @@ func Stats(cli *client.Client, ID string) *formatter.ContainerStats {
 	var statsJSON *types.StatsJSON
 	err = dec.Decode(&statsJSON)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
-	return convert(statsJSON)
+	return convert(statsJSON), nil
 }
 
 func convert(statsJSON *types.StatsJSON) *formatter.ContainerStats {
@@ -49,7 +59,7 @@ func convert(statsJSON *types.StatsJSON) *formatter.ContainerStats {
 	received, sent := parseNetwork(statsJSON.Networks)
 
 	containerStats.SetStatistics(formatter.StatsEntry{
-		Name:             statsJSON.Name,
+		Name:             statsJSON.Name[1:],
 		ID:               statsJSON.ID,
 		MemoryPercentage: memoryToPercentage(statsJSON),
 		CPUPercentage:    parseCPU(statsJSON),

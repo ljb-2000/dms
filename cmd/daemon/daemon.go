@@ -29,11 +29,23 @@ func main() {
 	})
 
 	e.GET("/stats/all", func(c echo.Context) error {
-		return c.JSON(http.StatusOK, s.AllStats(cli))
+		stats, err := s.StatsAll(cli)
+		if err != nil {
+			return c.JSON(http.StatusOK, map[string]interface{}{
+				"error": err.Error(),
+			})
+		}
+		return c.JSON(http.StatusOK, stats)
 	})
 
 	e.GET("/stats/:id", func(c echo.Context) error {
-		return c.JSON(http.StatusOK, s.Stats(cli, c.Param("id")))
+		stats, err := s.Stats(cli, c.Param("id"))
+		if err != nil {
+			return c.JSON(http.StatusOK, map[string]interface{}{
+				"error": err.Error(),
+			})
+		}
+		return c.JSON(http.StatusOK, stats)
 	})
 
 	e.Use(middleware.CORS())

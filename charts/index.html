@@ -17,11 +17,10 @@
 <body>
   <div id="chart" class="container">
 
-    <div>
+    <div class="h1">
 
       <h1>
-        Docker container monitoring service
-        <span id="alert" class="alert alert-warning" role="alert">Status</span>
+        <span id="alert-status" class="alert alert-warning" role="alert">404</span> Docker container monitoring service
       </h1>
 
     </div>
@@ -34,6 +33,8 @@
       <button class="btn btn-primary" onclick="stop()">STOP</button>
 
     </div>
+
+    <div id="alert-error-text" class="none" role="alert"></div>
 
   </div>
 
