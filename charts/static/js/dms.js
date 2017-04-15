@@ -77,13 +77,33 @@ function showCharts(id) {
       }
 
       for (let i = 0; i < data.length; i++) {
-        cpus[i] = setData(cpus[i], 'cpu', data[i].CPUPercentage)
-        mems[i] = setData(mems[i], 'mem', data[i].MemoryPercentage)
-        times[i] = setData(times[i], 'time', new Date())
+        if (!document.getElementById(data[i].Name)) {
+          createChartDiv(document.getElementById('chart'), data[i].Name)
 
-        charts[i].load({
-          columns: [times[i], cpus[i], mems[i]]
-        })
+          cpus.push(['cpu'])
+          mems.push(['mem'])
+          times.push(['time'])
+
+          cpus[i] = setData(cpus[i], 'cpu', data[i].CPUPercentage)
+          mems[i] = setData(mems[i], 'mem', data[i].MemoryPercentage)
+          times[i] = setData(times[i], 'time', new Date())
+
+          charts.push(createChart(data[i].Name, times[i], cpus[i], mems[i]))
+        }
+      }
+
+      for (let i = 0; i < data.length; i++) {
+        for (let k = 0; k < charts.length; k++) {
+          if (charts[k].element.id == data[i].Name) {
+            cpus[k] = setData(cpus[k], 'cpu', data[i].CPUPercentage)
+            mems[k] = setData(mems[k], 'mem', data[i].MemoryPercentage)
+            times[k] = setData(times[k], 'time', new Date())
+
+            charts[k].load({
+              columns: [times[k], cpus[k], mems[k]]
+            })
+          }
+        }
       }
 
       changeServerStatus('200')
@@ -108,6 +128,8 @@ function changeServerStatus(status, error, isAlert) {
   let alertStatus = document.getElementById('alert-status')
   let alertErrorText = document.getElementById('alert-error-text')
 
+  alertErrorText.setAttribute('class', 'none')
+
   if (status === '500') {
     console.log('error: ', error)
 
@@ -125,12 +147,10 @@ function changeServerStatus(status, error, isAlert) {
   } else if (status === '404') {
     alertStatus.innerText = '404'
     alertStatus.setAttribute('class', 'alert alert-warning')
-    alertErrorText.setAttribute('class', 'none')
 
     return
   }
 
-  alertErrorText.setAttribute('class', 'none')
   alertStatus.innerText = '200'
   alertStatus.setAttribute('class', 'alert alert-success')
 }

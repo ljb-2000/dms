@@ -20,29 +20,38 @@ func CollectData() {
 		panic(err)
 	}
 
-	containers, err := cli.ContainerList(context.Background(), types.ContainerListOptions{})
-	if err != nil {
-		panic(err)
-	}
+	for range time.Tick(time.Second * 3) {
+		containers, err := cli.ContainerList(context.Background(), types.ContainerListOptions{})
+		if err != nil {
+			panic(err)
+		}
 
-	for _, container := range containers {
-		go collect(cli, container.Names[0][1:])
+		for _, container := range containers {
+			if _, ok := Data[container.Names[0][1:]]; !ok {
+				go collect(cli, container.Names[0][1:])
+			}
+		}
 	}
 }
 
 func collect(cli *client.Client, ID string) {
 	for range time.Tick(time.Second) {
-		res, err := getOneStats(cli, ID)
+		oneStats, err := getOne(cli, ID)
 		if err != nil {
 			panic(err)
 		}
 
-		Data[ID] = res
+		if oneStats.CPUPercentage == 0 {
+			delete(Data, ID)
+			return
+		}
+
+		Data[ID] = oneStats
 	}
 }
 
-func GetStats(ID string) (*[]*formatter.ContainerStats, error) {
-	var res []*formatter.ContainerStats
+func Get(ID string) (*[]*formatter.ContainerStats, error) {
+	var containerStats []*formatter.ContainerStats
 
 	if ID == "all" {
 		if len(Data) == 0 {
@@ -50,34 +59,41 @@ func GetStats(ID string) (*[]*formatter.ContainerStats, error) {
 		}
 
 		for _, d := range Data {
-			res = append(res, d)
+			containerStats = append(containerStats, d)
 		}
 
-		return &res, nil
+		return &containerStats, nil
+
 	} else if strings.Contains(ID, ",") {
 		IDs := strings.Split(strings.Replace(ID, " ", "", -1), ",")
 
 		for _, ID := range IDs {
 			if data, ok := Data[ID]; ok {
-				res = append(res, data)
-			} else {
-				return nil, errors.New("there is no such container: " + ID)
+				containerStats = append(containerStats, data)
 			}
 		}
 
-		return &res, nil
+		if len(containerStats) == 0 {
+			var err string
+			for _, ID := range IDs {
+				err += ID + " "
+			}
+			return nil, errors.New("no running containers: " + err)
+		}
+
+		return &containerStats, nil
 	} else {
 		if data, ok := Data[ID]; ok {
-			res = append(res, data)
+			containerStats = append(containerStats, data)
 
-			return &res, nil
+			return &containerStats, nil
 		} else {
 			return nil, errors.New("there is no such container: " + ID)
 		}
 	}
 }
 
-func getOneStats(cli *client.Client, ID string) (*formatter.ContainerStats, error) {
+func getOne(cli *client.Client, ID string) (*formatter.ContainerStats, error) {
 	res, err := cli.ContainerStats(context.Background(), ID, true)
 	if err != nil {
 		return nil, err
