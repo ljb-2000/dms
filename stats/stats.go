@@ -12,9 +12,15 @@ import (
 	"time"
 )
 
-var Data = make(map[string]*formatter.ContainerStats)
+type Stats struct {
+	data              map[string]*formatter.ContainerStats
+	stoppedContainers []string
+	runningContainers []string
+}
 
-func CollectData() {
+func (s *Stats) CollectData() {
+	s.data = make(map[string]*formatter.ContainerStats)
+
 	cli, err := client.NewEnvClient()
 	if err != nil {
 		panic(err)
@@ -27,14 +33,26 @@ func CollectData() {
 		}
 
 		for _, container := range containers {
-			if _, ok := Data[container.Names[0][1:]]; !ok {
-				go collect(cli, container.Names[0][1:])
+			if _, ok := s.data[container.Names[0][1:]]; !ok {
+				go s.collect(cli, container.Names[0][1:])
 			}
 		}
 	}
 }
 
-func collect(cli *client.Client, ID string) {
+func (s *Stats) collect(cli *client.Client, ID string) {
+	i := -1
+	for k, _ := range s.stoppedContainers {
+		if s.stoppedContainers[k] == ID {
+			i = k
+		}
+	}
+	if i != -1 {
+		s.stoppedContainers = append(s.stoppedContainers[:i], s.stoppedContainers[i+1:]...)
+	}
+
+	s.runningContainers = append(s.runningContainers, ID)
+
 	for range time.Tick(time.Second) {
 		oneStats, err := getOne(cli, ID)
 		if err != nil {
@@ -42,32 +60,49 @@ func collect(cli *client.Client, ID string) {
 		}
 
 		if oneStats.CPUPercentage == 0 {
-			delete(Data, ID)
+			i := -1
+			for k, _ := range s.runningContainers {
+				if s.runningContainers[k] == ID {
+					i = k
+				}
+			}
+			if i != -1 {
+				s.runningContainers = append(s.runningContainers[:i], s.runningContainers[i+1:]...)
+			}
+
+			s.stoppedContainers = append(s.stoppedContainers, ID)
+			delete(s.data, ID)
 			return
 		}
 
-		Data[ID] = oneStats
+		s.data[ID] = oneStats
 	}
 }
 
-func Get(ID string) (*[]*formatter.ContainerStats, error) {
+func (s *Stats) Get(ID string) (*[]*formatter.ContainerStats, *[]string, *[]string, error) {
 	var containerStats []*formatter.ContainerStats
 
 	if ID == "all" {
-		if len(Data) == 0 {
-			return nil, errors.New("no running containers")
+		if len(s.data) == 0 {
+			return nil, nil, nil, errors.New("no running containers")
 		}
 
-		for _, d := range Data {
+		for _, d := range s.data {
 			containerStats = append(containerStats, d)
 		}
 
-		return &containerStats, nil
+		running := s.runningContainers
+		stopped := s.stoppedContainers
+
+		s.runningContainers = s.runningContainers[:0]
+		s.stoppedContainers = s.stoppedContainers[:0]
+
+		return &containerStats, &running, &stopped, nil
 	} else if strings.Contains(ID, ",") {
 		IDs := strings.Split(strings.Replace(ID, " ", "", -1), ",")
 
 		for _, ID := range IDs {
-			if data, ok := Data[ID]; ok {
+			if data, ok := s.data[ID]; ok {
 				containerStats = append(containerStats, data)
 			}
 		}
@@ -77,17 +112,29 @@ func Get(ID string) (*[]*formatter.ContainerStats, error) {
 			for _, ID := range IDs {
 				err += ID + " "
 			}
-			return nil, errors.New("no running containers: " + err)
+			return nil, nil, nil, errors.New("no running containers: " + err)
 		}
 
-		return &containerStats, nil
+		running := s.runningContainers
+		stopped := s.stoppedContainers
+
+		s.runningContainers = s.runningContainers[:0]
+		s.stoppedContainers = s.stoppedContainers[:0]
+
+		return &containerStats, &running, &stopped, nil
 	} else {
-		if data, ok := Data[ID]; ok {
+		if data, ok := s.data[ID]; ok {
 			containerStats = append(containerStats, data)
 
-			return &containerStats, nil
+			running := s.runningContainers
+			stopped := s.stoppedContainers
+
+			s.runningContainers = s.runningContainers[:0]
+			s.stoppedContainers = s.stoppedContainers[:0]
+
+			return &containerStats, &running, &stopped, nil
 		} else {
-			return nil, errors.New("there is no such container: " + ID)
+			return nil, nil, nil, errors.New("there is no such container: " + ID)
 		}
 	}
 }

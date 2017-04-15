@@ -3,24 +3,30 @@ package main
 import (
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
-	s "github.com/lavrs/docker-monitoring-service/stats"
+	dms "github.com/lavrs/docker-monitoring-service/stats"
 	"net/http"
 )
 
 func main() {
 	e := echo.New()
 
+	var s dms.Stats
+
 	go s.CollectData()
 
 	e.GET("/stats/:id", func(c echo.Context) error {
-		stats, err := s.Get(c.Param("id"))
+		stats, running, stopped, err := s.Get(c.Param("id"))
 		if err != nil {
 			return c.JSON(http.StatusOK, map[string]interface{}{
 				"error": err.Error(),
 			})
 		}
 
-		return c.JSON(http.StatusOK, stats)
+		return c.JSON(http.StatusOK, map[string]interface{}{
+			"stats":              stats,
+			"running_containers": running,
+			"stopped_containers": stopped,
+		})
 	})
 
 	e.Use(middleware.CORS())

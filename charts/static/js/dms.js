@@ -1,15 +1,13 @@
 let interval = null
 
-function show(isAllContainers) {
-  if (isAllContainers) {
-    stop()
-    interval = showCharts('all')
-  } else {
-    let id = document.getElementById('containerID')
-    stop()
-    interval = showCharts(id.value)
-    id.value = ''
+function show() {
+  let id = document.getElementById('containerID')
+  if (id.value === '') {
+    id.value = 'all'
   }
+  stop()
+  interval = showCharts(id.value)
+  id.value = ''
 }
 
 function clearCharts() {
@@ -113,7 +111,7 @@ function showCharts(id) {
 }
 
 function setData(data, dataType, apiData) {
-  if (data.length === 10) {
+  if (data.length === 25) {
     data.shift()
     data.shift()
     data.unshift(dataType)
