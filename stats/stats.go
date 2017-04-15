@@ -63,7 +63,6 @@ func Get(ID string) (*[]*formatter.ContainerStats, error) {
 		}
 
 		return &containerStats, nil
-
 	} else if strings.Contains(ID, ",") {
 		IDs := strings.Split(strings.Replace(ID, " ", "", -1), ",")
 

@@ -12,18 +12,6 @@ func main() {
 
 	go s.CollectData()
 
-	e.GET("/", func(c echo.Context) error {
-		return c.JSON(http.StatusOK, map[string]interface{}{
-			"status": "OK",
-		})
-	})
-
-	e.GET("/ping", func(c echo.Context) error {
-		return c.JSON(http.StatusOK, map[string]interface{}{
-			"message": "pong",
-		})
-	})
-
 	e.GET("/stats/:id", func(c echo.Context) error {
 		stats, err := s.Get(c.Param("id"))
 		if err != nil {
