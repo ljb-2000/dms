@@ -1,37 +1,37 @@
 package main
 
 import (
-	"github.com/labstack/echo"
-	"github.com/labstack/echo/middleware"
-	dms "github.com/lavrs/docker-monitoring-service/stats"
-	"net/http"
+	"github.com/lavrs/docker-monitoring-service/pkg/echo"
+	"github.com/urfave/cli"
+	"os"
 )
 
 func main() {
-	e := echo.New()
+	app := cli.NewApp()
 
-	var s dms.Stats
+	app.Flags = []cli.Flag{
+		cli.StringFlag{
+			Name:  "p, port",
+			Value: "8080",
+			Usage: "daemon port",
+		},
+	}
 
-	go s.CollectData()
-
-	e.GET("/stats/:id", func(c echo.Context) error {
-		stats, running, stopped, err := s.Get(c.Param("id"))
-		if err != nil {
-			return c.JSON(http.StatusOK, map[string]interface{}{
-				"error": err.Error(),
-			})
+	app.Action = func(c *cli.Context) error {
+		if c.NArg() > 0 {
+			err := cli.ShowAppHelp(c)
+			if err != nil {
+				panic(err)
+			}
 		}
 
-		return c.JSON(http.StatusOK, map[string]interface{}{
-			"stats":              stats,
-			"running_containers": running,
-			"stopped_containers": stopped,
-		})
-	})
+		echo.Echo(c.String("port"))
 
-	e.Use(middleware.CORS())
-	e.Use(middleware.Logger())
-	e.Use(middleware.Recover())
+		return nil
+	}
 
-	e.Logger.Fatal(e.Start(":8080"))
+	err := app.Run(os.Args)
+	if err != nil {
+		panic(err)
+	}
 }
