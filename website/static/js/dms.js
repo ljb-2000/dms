@@ -1,13 +1,13 @@
 let interval = null
 
 function show() {
-  let id = document.getElementById('containerID')
-  if (id.value === '') {
-    id.value = 'all'
+  let ids = document.getElementById('containerID')
+  if (ids.value === '') {
+    ids.value = 'all'
   }
   stop()
-  interval = showCharts(id.value)
-  id.value = ''
+  interval = showCharts(ids.value)
+  ids.value = ''
 }
 
 function clearCharts() {
@@ -39,84 +39,85 @@ function createChartDiv(parent, name) {
   parent.appendChild(div)
 }
 
-function showCharts(id) {
-  let charts = [],
-    cpus = [],
-    mems = [],
-    times = []
+function removeChartDiv(id) {
+  let div = document.getElementById(id)
+  let h2 = document.getElementById('h2' + id)
+  if (div && div.parentElement) {
+    div.parentElement.removeChild(div)
+    h2.parentElement.removeChild(h2)
+  }
+}
+
+function showCharts(ids) {
+  let chart = new Map(),
+    cpu = new Map(),
+    mem = new Map(),
+    time = new Map()
 
   return setInterval(function() {
-    fetch('http://localhost:8080/stats/' + id).then(response => {
+    fetch('http://localhost:8080/stats/' + ids).then(response => {
       return response.json()
     }).then(data => {
-      if (data.error != undefined) {
-        changeServerStatus('500', data.error)
-        return
+      if (data.error) {
+        throw data.error
       }
 
-      for (let i = 0; i < data.length; i++) {
-        if (!document.getElementById(data[i].Name)) {
-          createChartDiv(document.getElementById('chart'), data[i].Name)
+      if (data.stopped) {
+        for (let i in data.stopped) {
+          if (ids.includes(data.stopped[i]) || ids === 'all') {
+            removeChartDiv(data.stopped[i])
 
-          cpus.push(['cpu'])
-          mems.push(['mem'])
-          times.push(['time'])
-
-          cpus[i] = setData(cpus[i], 'cpu', data[i].CPUPercentage)
-          mems[i] = setData(mems[i], 'mem', data[i].MemoryPercentage)
-          times[i] = setData(times[i], 'time', new Date())
-
-          charts.push(createChart(data[i].Name, times[i], cpus[i], mems[i]))
-        }
-
-        for (let k = 0; k < charts.length; k++) {
-          if (charts[k].element.id == data[i].Name) {
-            cpus[k] = setData(cpus[k], 'cpu', data[i].CPUPercentage)
-            mems[k] = setData(mems[k], 'mem', data[i].MemoryPercentage)
-            times[k] = setData(times[k], 'time', new Date())
-
-            charts[k].load({
-              columns: [times[k], cpus[k], mems[k]]
-            })
+            cpu.delete(data.stopped[i])
+            mem.delete(data.stopped[i])
+            time.delete(data.stopped[i])
+            chart.delete(data.stopped[i])
           }
         }
       }
 
-      for (let i = 0; i < charts.length; i++) {
-        isFound = false
+      for (let i in data.data) {
+        id = data.data[i].Name
 
-        for (let k = 0; k < data.length; k++) {
-          if (charts[i].element.id == data[k].Name) {
-            isFound = true
-          }
-        }
+        if (chart.has(id)) {
+          cpu.set(id, setData(cpu.get(id), 'cpu', data.data[i].CPUPercentage))
+          mem.set(id, setData(mem.get(id), 'mem', data.data[i].MemoryPercentage))
+          time.set(id, setData(time.get(id), 'time', new Date()))
 
-        if (isFound) {
-          continue
-        }
+          chart.get(id).load({
+            columns: [time.get(id), cpu.get(id), mem.get(id)]
+          })
+        } else {
+          createChartDiv(document.getElementById('chart'), id)
 
-        let div = document.getElementById(charts[i].element.id)
-        let h2 = document.getElementById('h2' + charts[i].element.id)
-        if (div && div.parentElement) {
-          div.parentElement.removeChild(div)
-          h2.parentElement.removeChild(h2)
+          cpu.set(id, setData(['cpu'], 'cpu', 0))
+          mem.set(id, setData(['mem'], 'mem', 0))
+          time.set(id, setData(['time'], 'time', new Date()))
+          chart.set(id, createChart(
+            id,
+            time.get(id), cpu.get(id),
+            mem.get(id)))
         }
       }
 
       changeServerStatus('200')
     }).catch(error => {
-      changeServerStatus('500', 'Internal server error')
+      cpu.clear()
+      mem.clear()
+      time.clear()
+      chart.clear()
+
+      changeServerStatus('500', error)
     })
-  }, 1000)
+  }, 3000)
 }
 
-function setData(data, dataType, apiData) {
-  if (data.length === 25) {
+function setData(data, type, value) {
+  if (data.length === 10) {
     data.shift()
     data.shift()
-    data.unshift(dataType)
+    data.unshift(type)
   }
-  data.push(apiData)
+  data.push(value)
 
   return data
 }
