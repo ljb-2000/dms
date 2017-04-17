@@ -29,7 +29,7 @@ type statsAPI struct {
 	Data     *[]*formatter.ContainerStats `json:"data,omitempty"`
 	Launched []string                     `json:"launched,omitempty"`
 	Stopped  []string                     `json:"stopped,omitempty"`
-	Error    string                       `json:"error,omitempty"`
+	Message  string                       `json:"message,omitempty"`
 }
 
 func (s *Stats) Collect() {
@@ -96,7 +96,7 @@ func (s *Stats) Get(ID string) *statsAPI {
 		return &statsAPI{
 			Launched: launched,
 			Stopped:  stopped,
-			Error:    "no running containers",
+			Message:  "no running containers",
 		}
 	}
 
@@ -113,7 +113,7 @@ func (s *Stats) Get(ID string) *statsAPI {
 		return &statsAPI{
 			Launched: launched,
 			Stopped:  stopped,
-			Error:    "these containers are not running",
+			Message:  "these containers are not running",
 		}
 	}
 

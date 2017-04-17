@@ -9,11 +9,13 @@ import (
 func main() {
 	app := cli.NewApp()
 
+    app.Version = "0.1.0"
+
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
 			Name:  "p, port",
 			Value: "8080",
-			Usage: "daemon port",
+			Usage: "set daemon port",
 		},
 	}
 
@@ -21,8 +23,9 @@ func main() {
 		if c.NArg() > 0 {
 			err := cli.ShowAppHelp(c)
 			if err != nil {
-				panic(err)
+				return err
 			}
+			return nil
 		}
 
 		echo.Echo(c.String("port"))

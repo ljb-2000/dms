@@ -58,7 +58,7 @@ function showCharts(ids) {
     fetch('http://localhost:8080/stats/' + ids).then(response => {
       return response.json()
     }).then(data => {
-      if (data.error) {
+      if (data.message) {
         throw data.error
       }
 
