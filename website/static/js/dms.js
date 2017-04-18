@@ -55,7 +55,7 @@ function showCharts(ids) {
     time = new Map()
 
   return setInterval(function() {
-    fetch('http://localhost:8080/stats/' + ids).then(response => {
+    fetch('http://localhost:8080/metrics/' + ids).then(response => {
       return response.json()
     }).then(data => {
       if (data.message) {
@@ -75,12 +75,12 @@ function showCharts(ids) {
         }
       }
 
-      for (let i in data.data) {
-        id = data.data[i].Name
+      for (let i in data.metrics) {
+        id = data.metrics[i].Name
 
         if (chart.has(id)) {
-          cpu.set(id, setData(cpu.get(id), 'cpu', data.data[i].CPUPercentage))
-          mem.set(id, setData(mem.get(id), 'mem', data.data[i].MemoryPercentage))
+          cpu.set(id, setData(cpu.get(id), 'cpu', data.metrics[i].CPUPercentage))
+          mem.set(id, setData(mem.get(id), 'mem', data.metrics[i].MemoryPercentage))
           time.set(id, setData(time.get(id), 'time', new Date()))
 
           chart.get(id).load({

@@ -1,4 +1,4 @@
-package stats
+package metrics
 
 import (
 	"context"
@@ -11,35 +11,35 @@ import (
 	"time"
 )
 
-func (s *Stats) collect(cli *client.Client, ID string) {
-	s.changes.Lock()
-	s.changes.changes[ID] = true
-	s.changes.Unlock()
+func (m *metrics) collect(cli *client.Client, id string) {
+	m.changes.Lock()
+	m.changes.changes[id] = true
+	m.changes.Unlock()
 
 	for range time.Tick(time.Second) {
-		stats, err := one(cli, ID)
+		metrics, err := one(cli, id)
 		if err != nil {
 			panic(err)
 		}
 
-		if stats.CPUPercentage == 0 {
-			s.changes.Lock()
-			s.changes.changes[ID] = false
-			s.changes.Unlock()
+		if metrics.CPUPercentage == 0 {
+			m.changes.Lock()
+			m.changes.changes[id] = false
+			m.changes.Unlock()
 
-			delete(s.data.data, ID)
+			delete(m.data.data, id)
 
 			return
 		}
 
-		s.data.Lock()
-		s.data.data[ID] = stats
-		s.data.Unlock()
+		m.data.Lock()
+		m.data.data[id] = metrics
+		m.data.Unlock()
 	}
 }
 
-func one(cli *client.Client, ID string) (*formatter.ContainerStats, error) {
-	stats, err := cli.ContainerStats(context.Background(), ID, true)
+func one(cli *client.Client, id string) (*formatter.ContainerStats, error) {
+	stats, err := cli.ContainerStats(context.Background(), id, true)
 	if err != nil {
 		return nil, err
 	}

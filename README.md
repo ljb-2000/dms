@@ -1,19 +1,19 @@
-# Docker container monitoring service
+# Docker monitoring service
 This service allows you to monitor the loading of the docker container in real time
-## API Documentation
+## API Usage
 REQUEST
 ```
-GET /stats/:id
+GET /stats/:id HTTP/1.1
 ```
 RESPONSE
 ```
-200 OK
+HTTP/1.1 200 OK
 Content-Type: application/json
 {
   "data": [
     {
       "Container": "",
-      "Name": "ss8",
+      "Name": "container1",
       "ID": "0ddf7dfdedb61c22a47aa032b069cb51f11c7e95a61f210aab2d419829dab46f",
       "CPUPercentage": 0.0023855158363192976,
       "Memory": 581632,
@@ -36,10 +36,10 @@ Content-Type: application/json
   "message": "message"
 }
 ```
-## CLI Documentation
+## CLI Usage
 ```
 NAME:
-   dms - docker container monitoring service
+   dms - docker monitoring service
 
 USAGE:
    dms [global options] command [command options] [arguments...]

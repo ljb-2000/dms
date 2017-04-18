@@ -3,18 +3,19 @@ package echo
 import (
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
-	"github.com/lavrs/docker-monitoring-service/pkg/stats"
+	"github.com/lavrs/docker-monitoring-service/pkg/metrics"
 	"net/http"
 )
 
 func Echo(port string) {
 	e := echo.New()
 
-	var s stats.Stats
-	go s.Collect()
+	m := metrics.NewMetrics()
 
-	e.GET("/stats/:id", func(c echo.Context) error {
-		return c.JSON(http.StatusOK, s.Get(c.Param("id")))
+	go m.Collect()
+
+	e.GET("/metrics/:id", func(c echo.Context) error {
+		return c.JSON(http.StatusOK, m.Get(c.Param("id")))
 	})
 
 	e.Use(middleware.CORS())
