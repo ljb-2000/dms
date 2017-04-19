@@ -1,23 +1,21 @@
 package metrics
 
 import (
-	"context"
-	"encoding/json"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/cli/command/formatter"
-	"github.com/docker/docker/client"
+	"github.com/lavrs/docker-monitoring-service/pkg/docker"
 	"math"
 	"strings"
 	"time"
 )
 
-func (m *metrics) collect(cli *client.Client, id string) {
+func (m *metrics) collect(id string) {
 	m.changes.Lock()
 	m.changes.changes[id] = true
 	m.changes.Unlock()
 
 	for range time.Tick(time.Second) {
-		metrics, err := one(cli, id)
+		metrics, err := one(id)
 		if err != nil {
 			panic(err)
 		}
@@ -38,16 +36,8 @@ func (m *metrics) collect(cli *client.Client, id string) {
 	}
 }
 
-func one(cli *client.Client, id string) (*formatter.ContainerStats, error) {
-	stats, err := cli.ContainerStats(context.Background(), id, true)
-	if err != nil {
-		return nil, err
-	}
-	defer stats.Body.Close()
-
-	dec := json.NewDecoder(stats.Body)
-	var statsJSON *types.StatsJSON
-	err = dec.Decode(&statsJSON)
+func one(id string) (*formatter.ContainerStats, error) {
+	statsJSON, err := docker.ContainerStats(id)
 	if err != nil {
 		return nil, err
 	}

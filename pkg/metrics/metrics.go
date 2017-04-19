@@ -1,10 +1,8 @@
 package metrics
 
 import (
-	"context"
-	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/cli/command/formatter"
-	"github.com/docker/docker/client"
+	"github.com/lavrs/docker-monitoring-service/pkg/docker"
 	"strings"
 	"time"
 )
@@ -17,20 +15,15 @@ func NewMetrics() *metrics {
 }
 
 func (m *metrics) Collect() {
-	cli, err := client.NewEnvClient()
-	if err != nil {
-		panic(err)
-	}
-
 	for range time.Tick(time.Second * 3) {
-		containers, err := cli.ContainerList(context.Background(), types.ContainerListOptions{})
+		containers, err := docker.ContainerList()
 		if err != nil {
 			panic(err)
 		}
 
 		for _, container := range containers {
 			if _, ok := m.data.data[container.Names[0][1:]]; !ok {
-				go m.collect(cli, container.Names[0][1:])
+				go m.collect(container.Names[0][1:])
 			}
 		}
 	}
@@ -42,7 +35,7 @@ func (m *metrics) Get(id string) *metricsAPI {
 		ids        []string
 		launched   []string
 		stopped    []string
-		isNotExist int = 0
+		isNotExist = 0
 	)
 
 	if id == "all" {
@@ -51,8 +44,8 @@ func (m *metrics) Get(id string) *metricsAPI {
 			ids = append(ids, d.Name)
 		}
 		m.data.RUnlock()
-	} else if strings.Contains(id, ",") {
-		ids = strings.Split(strings.Replace(id, " ", "", -1), ",")
+	} else if strings.Contains(id, " ") {
+		ids = strings.Split(strings.Replace(id, " ", "", -1), " ")
 	} else {
 		ids = append(ids, id)
 	}
@@ -99,7 +92,7 @@ func (m *metrics) Get(id string) *metricsAPI {
 	}
 
 	return &metricsAPI{
-		Metrics:  &metrics,
+		Metrics:  metrics,
 		Launched: launched,
 		Stopped:  stopped,
 	}

@@ -21,8 +21,8 @@ type metrics struct {
 }
 
 type metricsAPI struct {
-	Metrics  *[]*formatter.ContainerStats `json:"metrics,omitempty"`
-	Launched []string                     `json:"launched,omitempty"`
-	Stopped  []string                     `json:"stopped,omitempty"`
-	Message  string                       `json:"message,omitempty"`
+	Metrics  []*formatter.ContainerStats `json:"metrics,omitempty"`
+	Launched []string                    `json:"launched,omitempty"`
+	Stopped  []string                    `json:"stopped,omitempty"`
+	Message  string                      `json:"message,omitempty"`
 }
