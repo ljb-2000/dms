@@ -29,8 +29,18 @@ func TestGet_Collect(t *testing.T) {
 	metrics := m.Get(cName)
 	assert.Equal(t, "no running containers", metrics.Message)
 
-	docker.StartContainer(t, cImage, cName)
-	defer docker.RemoveContainer(t, cName)
+	err := docker.ImagePull(cImage)
+	assert.NoError(t, err)
+
+	err = docker.StartContainer(cImage, cName)
+	assert.NoError(t, err)
+	defer func() {
+		err = docker.RemoveContainer(cName)
+		assert.NoError(t, err)
+
+		err = docker.ImageRemove(cImage)
+		assert.NoError(t, err)
+	}()
 	pending()
 
 	metrics = m.Get(cAll)
@@ -40,8 +50,8 @@ func TestGet_Collect(t *testing.T) {
 	metrics = m.Get("container1 container2")
 	assert.Equal(t, "these containers are not running", metrics.Message)
 
-	docker.StopContainer(t, cName)
-
+	err = docker.StopContainer(cName)
+	assert.NoError(t, err)
 	pending()
 
 	metrics = m.Get(cName)
@@ -49,5 +59,5 @@ func TestGet_Collect(t *testing.T) {
 }
 
 func pending() {
-	time.Sleep(ucListTime)
+	time.Sleep(ucListTime * 2)
 }

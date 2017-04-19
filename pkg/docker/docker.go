@@ -7,10 +7,8 @@ import (
 	c "github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/client"
-	"github.com/stretchr/testify/assert"
 	"io"
 	"os"
-	"testing"
 )
 
 var (
@@ -52,29 +50,58 @@ func ContainerStats(id string) (*types.StatsJSON, error) {
 	return statsJSON, nil
 }
 
-func StartContainer(t *testing.T, cImage, cName string) {
-	out, err := cli.ImagePull(ctx, cImage, types.ImagePullOptions{})
-	assert.NoError(t, err)
-	io.Copy(os.Stdout, out)
-	assert.NoError(t, err)
-
+func StartContainer(cImage, cName string) error {
 	container, err := cli.ContainerCreate(ctx, &c.Config{
 		Image: cImage,
 	}, &c.HostConfig{}, &network.NetworkingConfig{}, cName)
-	assert.NoError(t, err)
+	if err != nil {
+		return err
+	}
 
 	err = cli.ContainerStart(ctx, container.ID, types.ContainerStartOptions{})
-	assert.NoError(t, err)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
-func StopContainer(t *testing.T, cName string) {
+func ImagePull(cImage string) error {
+	out, err := cli.ImagePull(ctx, cImage, types.ImagePullOptions{})
+	if err != nil {
+		return err
+	}
+	_, err = io.Copy(os.Stdout, out)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func StopContainer(cName string) error {
 	err := cli.ContainerStop(ctx, cName, nil)
-	assert.NoError(t, err)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
-func RemoveContainer(t *testing.T, cName string) {
-	err := cli.ContainerRemove(ctx, cName, types.ContainerRemoveOptions{})
-	assert.NoError(t, err)
+func ImageRemove(cImage string) error {
+	_, err := cli.ImageRemove(ctx, cImage, types.ImageRemoveOptions{})
+	if err != nil {
+		return err
+	}
 
-	// проверять имадж и удалять
+	return nil
+}
+
+func RemoveContainer(cName string) error {
+	err := cli.ContainerRemove(ctx, cName, types.ContainerRemoveOptions{})
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
