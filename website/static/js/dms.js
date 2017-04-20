@@ -55,7 +55,7 @@ function showCharts(ids) {
     time = new Map()
 
   return setInterval(function() {
-    fetch('http://localhost:8080/metrics/' + ids).then(response => {
+    fetch('http://localhost:4222/metrics/' + ids).then(response => {
       return response.json()
     }).then(data => {
       if (data.message) {

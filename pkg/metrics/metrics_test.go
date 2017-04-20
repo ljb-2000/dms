@@ -1,63 +1,65 @@
-package metrics
+package metrics_test
 
 import (
 	"github.com/lavrs/docker-monitoring-service/pkg/docker"
+	m "github.com/lavrs/docker-monitoring-service/pkg/metrics"
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
 )
 
-var (
-	cName         = "splines"
-	cImage        = "bfirsh/reticulate-splines"
-	cAll          = "all"
-	ucListTime    = time.Second * 3
-	ucMetricsTime = time.Second * 1
-)
-
 func TestNewMetrics(t *testing.T) {
-	m := NewMetrics()
-	assert.NotNil(t, m)
+	metrics := m.NewMetrics()
+	assert.NotNil(t, metrics)
 }
 
 func TestGet_Collect(t *testing.T) {
-	m := NewMetrics()
-	assert.NotNil(t, m)
+	const (
+		cName         = "splines"
+		cImage        = "bfirsh/reticulate-splines"
+		cAll          = "all"
+		ucListTime    = time.Second * 3
+		ucMetricsTime = time.Second * 1
+	)
 
-	go m.Collect()
+	metrics := m.NewMetrics()
+	assert.NotNil(t, metrics)
 
-	metrics := m.Get(cName)
-	assert.Equal(t, "no running containers", metrics.Message)
+	go metrics.Collect()
+
+	cMetrics := metrics.Get(cName)
+	assert.Equal(t, "no running containers", cMetrics.Message)
 
 	err := docker.ImagePull(cImage)
 	assert.NoError(t, err)
-
-	err = docker.StartContainer(cImage, cName)
+	err = docker.ContainerCreate(cImage, cName)
+	assert.NoError(t, err)
+	err = docker.ContainerStart(cName)
 	assert.NoError(t, err)
 	defer func() {
-		err = docker.RemoveContainer(cName)
+		err = docker.ContainerRemove(cName)
 		assert.NoError(t, err)
 
 		err = docker.ImageRemove(cImage)
 		assert.NoError(t, err)
 	}()
-	pending()
+	pending(ucListTime)
 
-	metrics = m.Get(cAll)
-	assert.Equal(t, cName, metrics.Launched[0])
-	assert.Equal(t, cName, metrics.Metrics[0].Name)
+	cMetrics = metrics.Get(cAll)
+	assert.Equal(t, cName, cMetrics.Launched[0])
+	assert.Equal(t, cName, cMetrics.Metrics[0].Name)
 
-	metrics = m.Get("container1 container2")
-	assert.Equal(t, "these containers are not running", metrics.Message)
+	cMetrics = metrics.Get("container1 container2")
+	assert.Equal(t, "these containers are not running", cMetrics.Message)
 
-	err = docker.StopContainer(cName)
+	err = docker.ContainerStop(cName)
 	assert.NoError(t, err)
-	pending()
+	pending(ucListTime)
 
-	metrics = m.Get(cName)
-	assert.Equal(t, cName, metrics.Stopped[0])
+	cMetrics = metrics.Get(cName)
+	assert.Equal(t, cName, cMetrics.Stopped[0])
 }
 
-func pending() {
-	time.Sleep(ucListTime * 2)
+func pending(t time.Duration) {
+	time.Sleep(t * 2)
 }

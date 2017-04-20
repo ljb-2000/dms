@@ -50,15 +50,19 @@ func ContainerStats(id string) (*types.StatsJSON, error) {
 	return statsJSON, nil
 }
 
-func StartContainer(cImage, cName string) error {
-	container, err := cli.ContainerCreate(ctx, &c.Config{
+func ContainerCreate(cImage, cName string) error {
+	_, err := cli.ContainerCreate(ctx, &c.Config{
 		Image: cImage,
 	}, &c.HostConfig{}, &network.NetworkingConfig{}, cName)
 	if err != nil {
 		return err
 	}
 
-	err = cli.ContainerStart(ctx, container.ID, types.ContainerStartOptions{})
+	return nil
+}
+
+func ContainerStart(cName string) error {
+	err = cli.ContainerStart(ctx, cName, types.ContainerStartOptions{})
 	if err != nil {
 		return err
 	}
@@ -79,7 +83,7 @@ func ImagePull(cImage string) error {
 	return nil
 }
 
-func StopContainer(cName string) error {
+func ContainerStop(cName string) error {
 	err := cli.ContainerStop(ctx, cName, nil)
 	if err != nil {
 		return err
@@ -97,7 +101,7 @@ func ImageRemove(cImage string) error {
 	return nil
 }
 
-func RemoveContainer(cName string) error {
+func ContainerRemove(cName string) error {
 	err := cli.ContainerRemove(ctx, cName, types.ContainerRemoveOptions{})
 	if err != nil {
 		return err

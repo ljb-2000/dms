@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/lavrs/docker-monitoring-service/pkg/echo"
+	"github.com/lavrs/docker-monitoring-service/pkg/daemon"
 	"github.com/urfave/cli"
 	"os"
 )
@@ -14,7 +14,7 @@ func main() {
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
 			Name:  "p, port",
-			Value: "8080",
+			Value: "4222",
 			Usage: "set daemon port",
 		},
 	}
@@ -28,7 +28,10 @@ func main() {
 			return nil
 		}
 
-		echo.Echo(c.String("p"))
+		err := daemon.Run(c.String("p"))
+		if err != nil {
+			panic(err)
+		}
 
 		return nil
 	}
