@@ -4,6 +4,7 @@ import (
 	"github.com/lavrs/docker-monitoring-service/pkg/daemon"
 	"github.com/urfave/cli"
 	"os"
+	"time"
 )
 
 func main() {
@@ -19,6 +20,22 @@ func main() {
 		},
 	}
 
+	app.Flags = []cli.Flag{
+		cli.IntFlag{
+			Name:  "uct, upd-container-time",
+			Value: 1,
+			Usage: "set daemon port",
+		},
+	}
+
+	app.Flags = []cli.Flag{
+		cli.IntFlag{
+			Name:  "uclt, upd-container-list-time",
+			Value: 3,
+			Usage: "set daemon port",
+		},
+	}
+
 	app.Action = func(c *cli.Context) error {
 		if c.NArg() > 0 {
 			err := cli.ShowAppHelp(c)
@@ -28,7 +45,7 @@ func main() {
 			return nil
 		}
 
-		err := daemon.Run(c.String("p"))
+		err := daemon.Run(c.String("p"), c.Int("eclt"), c.Int("ect"))
 		if err != nil {
 			panic(err)
 		}

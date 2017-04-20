@@ -1,3 +1,4 @@
+[![Go Report Card](https://goreportcard.com/badge/github.com/lavrs/docker-monitoring-service)](https://goreportcard.com/report/github.com/lavrs/docker-monitoring-service)
 # Docker monitoring service
 This service allows you to monitor the loading of the docker container in real time
 ## API Usage

@@ -3,6 +3,7 @@ package metrics
 import (
 	"github.com/docker/docker/cli/command/formatter"
 	"sync"
+	"time"
 )
 
 type dataMap struct {
@@ -16,13 +17,15 @@ type changeMap struct {
 }
 
 type metrics struct {
-	data    dataMap
-	changes changeMap
+	data       dataMap
+	changes    changeMap
+	ucListTime time.Duration
+	ucTime     time.Duration
 }
 
 type metricsAPI struct {
-	Metrics  []*formatter.ContainerStats `json:"metrics,omitempty"`
-	Launched []string                    `json:"launched,omitempty"`
-	Stopped  []string                    `json:"stopped,omitempty"`
-	Message  string                      `json:"message,omitempty"`
+	Metrics  *[]*formatter.ContainerStats `json:"metrics,omitempty"`
+	Launched []string                     `json:"launched,omitempty"`
+	Stopped  []string                     `json:"stopped,omitempty"`
+	Message  string                       `json:"message,omitempty"`
 }

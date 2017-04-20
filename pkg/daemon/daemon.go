@@ -5,13 +5,16 @@ import (
 	"github.com/julienschmidt/httprouter"
 	m "github.com/lavrs/docker-monitoring-service/pkg/metrics"
 	"net/http"
+	"time"
 )
 
 var metrics = m.NewMetrics()
 
-func Run(port string) error {
+func Run(port string, ucltime, uctime int) error {
 	router := httprouter.New()
 
+	metrics.SetUCLTime(time.Second * time.Duration(ucltime))
+	metrics.SetUCTime(time.Second * time.Duration(uctime))
 	go metrics.Collect()
 
 	router.GET("/metrics/:id", getMetrics)

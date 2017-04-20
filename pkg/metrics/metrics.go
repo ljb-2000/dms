@@ -9,19 +9,29 @@ import (
 
 func NewMetrics() *metrics {
 	return &metrics{
-		data:    dataMap{data: make(map[string]*formatter.ContainerStats)},
-		changes: changeMap{changes: make(map[string]bool)},
+		data:       dataMap{data: make(map[string]*formatter.ContainerStats)},
+		changes:    changeMap{changes: make(map[string]bool)},
+		ucListTime: time.Second * 3,
+		ucTime:     time.Second,
 	}
 }
 
+func (m *metrics) SetUCLTime(t time.Duration) {
+	m.ucListTime = t
+}
+
+func (m *metrics) SetUCTime(t time.Duration) {
+	m.ucTime = t
+}
+
 func (m *metrics) Collect() {
-	for range time.Tick(time.Second * 3) {
+	for range time.Tick(m.ucListTime) {
 		containers, err := docker.ContainerList()
 		if err != nil {
 			panic(err)
 		}
 
-		for _, container := range containers {
+		for _, container := range *containers {
 			if _, ok := m.data.data[container.Names[0][1:]]; !ok {
 				go m.collect(container.Names[0][1:])
 			}
@@ -92,7 +102,7 @@ func (m *metrics) Get(id string) *metricsAPI {
 	}
 
 	return &metricsAPI{
-		Metrics:  metrics,
+		Metrics:  &metrics,
 		Launched: launched,
 		Stopped:  stopped,
 	}

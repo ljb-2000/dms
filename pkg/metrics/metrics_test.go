@@ -47,7 +47,7 @@ func TestGet_Collect(t *testing.T) {
 
 	cMetrics = metrics.Get(cAll)
 	assert.Equal(t, cName, cMetrics.Launched[0])
-	assert.Equal(t, cName, cMetrics.Metrics[0].Name)
+	assert.Equal(t, cName, (*cMetrics.Metrics)[0].Name)
 
 	cMetrics = metrics.Get("container1 container2")
 	assert.Equal(t, "these containers are not running", cMetrics.Message)

@@ -12,7 +12,6 @@ import (
 )
 
 var (
-	ctx = context.Background()
 	cli *client.Client
 	err error
 )
@@ -24,13 +23,13 @@ func init() {
 	}
 }
 
-func ContainerList() ([]types.Container, error) {
+func ContainerList() (*[]types.Container, error) {
 	containers, err := cli.ContainerList(context.Background(), types.ContainerListOptions{})
 	if err != nil {
 		return nil, err
 	}
 
-	return containers, nil
+	return &containers, nil
 }
 
 func ContainerStats(id string) (*types.StatsJSON, error) {
@@ -51,7 +50,7 @@ func ContainerStats(id string) (*types.StatsJSON, error) {
 }
 
 func ContainerCreate(cImage, cName string) error {
-	_, err := cli.ContainerCreate(ctx, &c.Config{
+	_, err := cli.ContainerCreate(context.Background(), &c.Config{
 		Image: cImage,
 	}, &c.HostConfig{}, &network.NetworkingConfig{}, cName)
 	if err != nil {
@@ -62,7 +61,7 @@ func ContainerCreate(cImage, cName string) error {
 }
 
 func ContainerStart(cName string) error {
-	err = cli.ContainerStart(ctx, cName, types.ContainerStartOptions{})
+	err = cli.ContainerStart(context.Background(), cName, types.ContainerStartOptions{})
 	if err != nil {
 		return err
 	}
@@ -71,7 +70,7 @@ func ContainerStart(cName string) error {
 }
 
 func ImagePull(cImage string) error {
-	out, err := cli.ImagePull(ctx, cImage, types.ImagePullOptions{})
+	out, err := cli.ImagePull(context.Background(), cImage, types.ImagePullOptions{})
 	if err != nil {
 		return err
 	}
@@ -84,7 +83,7 @@ func ImagePull(cImage string) error {
 }
 
 func ContainerStop(cName string) error {
-	err := cli.ContainerStop(ctx, cName, nil)
+	err := cli.ContainerStop(context.Background(), cName, nil)
 	if err != nil {
 		return err
 	}
@@ -93,7 +92,7 @@ func ContainerStop(cName string) error {
 }
 
 func ImageRemove(cImage string) error {
-	_, err := cli.ImageRemove(ctx, cImage, types.ImageRemoveOptions{})
+	_, err := cli.ImageRemove(context.Background(), cImage, types.ImageRemoveOptions{})
 	if err != nil {
 		return err
 	}
@@ -102,7 +101,7 @@ func ImageRemove(cImage string) error {
 }
 
 func ContainerRemove(cName string) error {
-	err := cli.ContainerRemove(ctx, cName, types.ContainerRemoveOptions{})
+	err := cli.ContainerRemove(context.Background(), cName, types.ContainerRemoveOptions{})
 	if err != nil {
 		return err
 	}
