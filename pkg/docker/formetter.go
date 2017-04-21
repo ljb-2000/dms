@@ -14,7 +14,7 @@ func Formatting(statsJSON *types.StatsJSON) *formatter.ContainerStats {
 	received, sent := parseNetwork(statsJSON.Networks)
 
 	stats.SetStatistics(formatter.StatsEntry{
-		Name:             statsJSON.Name,
+		Name:             statsJSON.Name[1:],
 		ID:               statsJSON.ID,
 		MemoryPercentage: parseMemory(statsJSON),
 		CPUPercentage:    parseCPU(statsJSON),

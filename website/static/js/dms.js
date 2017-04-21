@@ -59,7 +59,7 @@ function showCharts(ids) {
       return response.json()
     }).then(data => {
       if (data.message) {
-        throw data.error
+        throw data.message
       }
 
       if (data.stopped) {
@@ -127,6 +127,8 @@ function changeServerStatus(status, error) {
   let alertErrorText = document.getElementById('alert-error-text')
 
   alertErrorText.setAttribute('class', 'none')
+  console.log(error)
+  console.log(status)
 
   if (status === '500') {
     clearCharts()

@@ -32,8 +32,8 @@ func (m *metrics) Collect() {
 		}
 
 		for _, container := range *containers {
-			if _, ok := m.data.data[container.Names[0]]; !ok {
-				go m.collect(container.Names[0])
+			if _, ok := m.data.data[container.Names[0][1:]]; !ok {
+				go m.collect(container.Names[0][1:])
 			}
 		}
 	}

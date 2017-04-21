@@ -17,17 +17,11 @@ func main() {
 			Value: "4222",
 			Usage: "set daemon port",
 		},
-	}
-
-	app.Flags = []cli.Flag{
 		cli.IntFlag{
 			Name:  "uct, upd-container-time",
 			Value: 1,
 			Usage: "set update container interval",
 		},
-	}
-
-	app.Flags = []cli.Flag{
 		cli.IntFlag{
 			Name:  "uclt, upd-container-list-time",
 			Value: 3,
@@ -44,7 +38,7 @@ func main() {
 			return nil
 		}
 
-		err := daemon.Run(c.String("p"), c.Int("eclt"), c.Int("ect"))
+		err := daemon.Run(c.String("p"), c.Int("uclt"), c.Int("uct"))
 		if err != nil {
 			panic(err)
 		}

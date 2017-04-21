@@ -1,37 +1,53 @@
 package daemon
 
 import (
-	"encoding/json"
-	"github.com/julienschmidt/httprouter"
+	"github.com/labstack/echo"
+	"github.com/labstack/echo/middleware"
 	m "github.com/lavrs/docker-monitoring-service/pkg/metrics"
+	"html/template"
+	"io"
 	"net/http"
 	"time"
 )
 
-var metrics = m.NewMetrics()
-
 func Run(port string, ucltime, uctime int) error {
-	router := httprouter.New()
+	const (
+		rootDir       = "website"
+		indexTemplate = "index.html"
+	)
 
-	metrics.SetUCLTime(time.Second * time.Duration(ucltime))
-	metrics.SetUCTime(time.Second * time.Duration(uctime))
+	e := echo.New()
+	e.Use(middleware.CORS())
+	e.Use(middleware.Recover())
+	e.Use(middleware.Logger())
+	e.Use(middleware.Static(rootDir))
+
+	metrics := m.NewMetrics()
+	metrics.SetUCLTime(time.Duration(ucltime) * time.Second)
+	metrics.SetUCTime(time.Duration(uctime) * time.Second)
+
 	go metrics.Collect()
 
-	router.GET("/metrics/:id", getMetrics)
+	e.GET("/metrics/:id", func(c echo.Context) error {
+		return c.JSON(http.StatusOK, metrics.Get(c.Param("id")))
+	})
 
-	return http.ListenAndServe(":"+port, router)
+	e.GET("/charts", func(c echo.Context) error {
+		t := &Template{
+			templates: template.Must(template.ParseGlob(rootDir + "/" + indexTemplate)),
+		}
+		e.Renderer = t
+
+		return c.Render(http.StatusOK, indexTemplate, nil)
+	})
+
+	return e.Start(":" + port)
 }
 
-func getMetrics(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-	w.WriteHeader(200)
+type Template struct {
+	templates *template.Template
+}
 
-	w.Header().Add("Access-Control-Allow-Origin", "*")
-	w.Header().Add("Content-Type", "application/json")
-
-	metricsJSON, err := json.Marshal(metrics.Get(p.ByName("id")))
-	if err != nil {
-		panic(err)
-	}
-
-	w.Write(metricsJSON)
+func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
+	return t.templates.ExecuteTemplate(w, name, data)
 }

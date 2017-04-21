@@ -43,10 +43,10 @@ Content-Type: application/json
 ### CLI Usage (run daemon)
 ```
 NAME:
-   dms - docker monitoring service
+   daemon: run.exe - A new cli application
 
 USAGE:
-   dms [global options] command [command options] [arguments...]
+   daemon: run.exe [global options] command [command options] [arguments...]
 
 VERSION:
    0.1.0
@@ -55,9 +55,9 @@ COMMANDS:
      help, h  Shows a list of commands or help for one command
 
 GLOBAL OPTIONS:
-   -p value, --port value  set daemon port (default: "4222")
-   -uclt value, --upd-container-list-time value  set update container list interval (default: 3)
-   -uct value, --upd-container-time value  set update container interval (default: 1)
-   --help, -h              show help
-   --version, -v           print the version
+   -p value, --port value                         set daemon port (default: "4222")
+   --uct value, --upd-container-time value        set update container interval (default: 1)
+   --uclt value, --upd-container-list-time value  set update container list interval (default: 3)
+   --help, -h                                     show help
+   --version, -v                                  print the version
 ```
