@@ -19,7 +19,7 @@ func TestGet_Collect(t *testing.T) {
 		dockerCName   = "/splines"
 		cImage        = "bfirsh/reticulate-splines"
 		cAll          = "all"
-		ucListTime    = time.Second * 1
+		ucListTime    = time.Second * 2
 		ucMetricsTime = time.Second * 1
 	)
 
