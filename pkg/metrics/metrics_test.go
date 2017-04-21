@@ -67,7 +67,7 @@ func TestGet_Collect(t *testing.T) {
 	assert.NoError(t, err)
 	pending(ucListTime)
 
-	cMetrics = metrics.Get(cName)
+	cMetrics = metrics.Get(cAll)
 	assert.Equal(t, dockerCName, cMetrics.Stopped[0])
 }
 
