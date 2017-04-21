@@ -1,4 +1,4 @@
-[![Go Report Card](https://goreportcard.com/badge/github.com/lavrs/docker-monitoring-service)](https://goreportcard.com/report/github.com/lavrs/docker-monitoring-service)[![Build Status](https://travis-ci.org/lavrs/docker-monitoring-service.svg?branch=master)](https://travis-ci.org/lavrs/docker-monitoring-service)
+[![Go Report Card](https://goreportcard.com/badge/github.com/lavrs/docker-monitoring-service)](https://goreportcard.com/report/github.com/lavrs/docker-monitoring-service) [![Build Status](https://travis-ci.org/lavrs/docker-monitoring-service.svg?branch=master)](https://travis-ci.org/lavrs/docker-monitoring-service)
 # Docker monitoring service
 This service allows you to monitor the loading of the docker container in real time with the ability to view load charts
 ### API Usage
