@@ -1,11 +1,9 @@
 package metrics
 
 import (
-	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/cli/command/formatter"
 	"github.com/lavrs/docker-monitoring-service/pkg/docker"
-	"math"
-	"strings"
+	"io"
 	"time"
 )
 
@@ -17,6 +15,10 @@ func (m *metrics) collect(id string) {
 	for range time.Tick(m.ucTime) {
 		metrics, err := one(id)
 		if err != nil {
+			if err == io.EOF {
+				return
+			}
+
 			panic(err)
 		}
 

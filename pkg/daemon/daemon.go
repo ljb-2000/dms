@@ -28,7 +28,7 @@ func getMetrics(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	w.Header().Add("Access-Control-Allow-Origin", "*")
 	w.Header().Add("Content-Type", "application/json")
 
-	metricsJSON, err := json.Marshal(&metrics.Get(p.ByName("id")))
+	metricsJSON, err := json.Marshal(metrics.Get(p.ByName("id")))
 	if err != nil {
 		panic(err)
 	}

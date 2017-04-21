@@ -18,12 +18,18 @@ func TestGet_Collect(t *testing.T) {
 		cName         = "splines"
 		cImage        = "bfirsh/reticulate-splines"
 		cAll          = "all"
-		ucListTime    = time.Second * 3
-		ucMetricsTime = time.Second * 1
+		ucListTime    = time.Second * 1
+		ucMetricsTime = time.Millisecond * 500
+	)
+
+	var (
+		isLaunched = false
 	)
 
 	metrics := m.NewMetrics()
 	assert.NotNil(t, metrics)
+	metrics.SetUCLTime(ucListTime)
+	metrics.SetUCTime(ucMetricsTime)
 
 	go metrics.Collect()
 
@@ -46,8 +52,12 @@ func TestGet_Collect(t *testing.T) {
 	pending(ucListTime)
 
 	cMetrics = metrics.Get(cAll)
-	assert.Equal(t, cName, cMetrics.Launched[0])
-	assert.Equal(t, cName, (*cMetrics.Metrics)[0].Name)
+	for i, _ := range cMetrics.Launched {
+		if cMetrics.Launched[i] == cName {
+			isLaunched = true
+		}
+	}
+	assert.True(t, isLaunched)
 
 	cMetrics = metrics.Get("container1 container2")
 	assert.Equal(t, "these containers are not running", cMetrics.Message)

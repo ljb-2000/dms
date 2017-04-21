@@ -1,17 +1,17 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/lavrs/docker-monitoring-service)](https://goreportcard.com/report/github.com/lavrs/docker-monitoring-service)
 # Docker monitoring service
-This service allows you to monitor the loading of the docker container in real time
-## API Usage
+This service allows you to monitor the loading of the docker container in real time with the ability to view load charts
+### API Usage
 REQUEST
 ```
-GET /stats/:id HTTP/1.1
+GET /metrics/:id HTTP/1.1
 ```
 RESPONSE
 ```
 HTTP/1.1 200 OK
 Content-Type: application/json
 {
-  "data": [
+  "metrics": [
     {
       "Container": "",
       "Name": "container1",
@@ -37,7 +37,7 @@ Content-Type: application/json
   "message": "message"
 }
 ```
-## CLI Usage
+### CLI Usage
 ```
 NAME:
    dms - docker monitoring service
@@ -52,7 +52,9 @@ COMMANDS:
      help, h  Shows a list of commands or help for one command
 
 GLOBAL OPTIONS:
-   -p value, --port value  set daemon port (default: "8080")
+   -p value, --port value  set daemon port (default: "4222")
+   -uclt value, --upd-container-list-time value  set update container list interval (default: 3)
+   -uct value, --upd-container-time value  set update container interval (default: 1)
    --help, -h              show help
    --version, -v           print the version
 ```

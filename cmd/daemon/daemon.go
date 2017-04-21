@@ -4,7 +4,6 @@ import (
 	"github.com/lavrs/docker-monitoring-service/pkg/daemon"
 	"github.com/urfave/cli"
 	"os"
-	"time"
 )
 
 func main() {
@@ -24,7 +23,7 @@ func main() {
 		cli.IntFlag{
 			Name:  "uct, upd-container-time",
 			Value: 1,
-			Usage: "set daemon port",
+			Usage: "set update container interval",
 		},
 	}
 
@@ -32,7 +31,7 @@ func main() {
 		cli.IntFlag{
 			Name:  "uclt, upd-container-list-time",
 			Value: 3,
-			Usage: "set daemon port",
+			Usage: "set update container list interval",
 		},
 	}
 
