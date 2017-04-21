@@ -3,6 +3,9 @@ language: go
 sudo: required
 services:
   - docker
-  
+
+env:
+- DOCKER_API_VERSION="1.30"
+
 go:
   - 1.8.1
