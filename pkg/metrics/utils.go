@@ -3,6 +3,7 @@ package metrics
 import (
 	"github.com/docker/docker/cli/command/formatter"
 	"github.com/lavrs/docker-monitoring-service/pkg/docker"
+	"github.com/lavrs/docker-monitoring-service/pkg/logger"
 	"io"
 	"time"
 )
@@ -16,21 +17,16 @@ func (m *metrics) collect(id string) {
 		metrics, err := one(id)
 		if err != nil {
 			if err == io.EOF {
+				logger.Info("container ", id, "removed")
+				m.removeCFromMap(id)
 				return
 			}
-
-			panic(err)
+			logger.Panic(err)
 		}
 
 		if metrics.CPUPercentage == 0 {
-			m.changes.Lock()
-			m.changes.changes[id] = false
-			m.changes.Unlock()
-
-			m.data.Lock()
-			delete(m.data.data, id)
-			m.data.Unlock()
-
+			logger.Info("container ", id, "stopped")
+			m.removeCFromMap(id)
 			return
 		}
 
@@ -38,6 +34,16 @@ func (m *metrics) collect(id string) {
 		m.data.data[id] = metrics
 		m.data.Unlock()
 	}
+}
+
+func (m *metrics) removeCFromMap(id string) {
+	m.changes.Lock()
+	m.changes.changes[id] = false
+	m.changes.Unlock()
+
+	m.data.Lock()
+	delete(m.data.data, id)
+	m.data.Unlock()
 }
 
 func one(id string) (*formatter.ContainerStats, error) {

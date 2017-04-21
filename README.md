@@ -58,6 +58,7 @@ GLOBAL OPTIONS:
    -p value, --port value                         set daemon port (default: "4222")
    --uct value, --upd-container-time value        set update container interval (default: 1)
    --uclt value, --upd-container-list-time value  set update container list interval (default: 3)
+   -d, --debug                                    set debug mode
    --help, -h                                     show help
    --version, -v                                  print the version
 ```

@@ -1,7 +1,9 @@
 package main
 
 import (
+	"github.com/lavrs/docker-monitoring-service/pkg/context"
 	"github.com/lavrs/docker-monitoring-service/pkg/daemon"
+	"github.com/lavrs/docker-monitoring-service/pkg/logger"
 	"github.com/urfave/cli"
 	"os"
 )
@@ -27,6 +29,10 @@ func main() {
 			Value: 3,
 			Usage: "set update container list interval",
 		},
+		cli.BoolFlag{
+			Name:  "d, debug",
+			Usage: "set debug mode",
+		},
 	}
 
 	app.Action = func(c *cli.Context) error {
@@ -38,16 +44,18 @@ func main() {
 			return nil
 		}
 
+		ctx := context.Get()
+		ctx.Debug = c.Bool("d")
+
 		err := daemon.Run(c.String("p"), c.Int("uclt"), c.Int("uct"))
 		if err != nil {
-			panic(err)
+			return err
 		}
-
 		return nil
 	}
 
 	err := app.Run(os.Args)
 	if err != nil {
-		panic(err)
+		logger.Panic(err)
 	}
 }

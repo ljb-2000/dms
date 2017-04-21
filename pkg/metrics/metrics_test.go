@@ -1,6 +1,7 @@
 package metrics_test
 
 import (
+	"github.com/lavrs/docker-monitoring-service/pkg/context"
 	"github.com/lavrs/docker-monitoring-service/pkg/docker"
 	m "github.com/lavrs/docker-monitoring-service/pkg/metrics"
 	"github.com/stretchr/testify/assert"
@@ -24,7 +25,10 @@ func TestGet_Collect(t *testing.T) {
 
 	var (
 		isLaunched = false
+		ctx        = context.Get()
 	)
+
+	ctx.Debug = false
 
 	metrics := m.NewMetrics()
 	assert.NotNil(t, metrics)

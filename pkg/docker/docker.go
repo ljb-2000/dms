@@ -7,6 +7,7 @@ import (
 	c "github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/client"
+	"github.com/lavrs/docker-monitoring-service/pkg/logger"
 	"io"
 	"os"
 )
@@ -19,7 +20,7 @@ var (
 func init() {
 	cli, err = client.NewEnvClient()
 	if err != nil {
-		panic(err)
+		logger.Panic(err)
 	}
 }
 
