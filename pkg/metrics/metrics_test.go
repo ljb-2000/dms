@@ -16,10 +16,11 @@ func TestNewMetrics(t *testing.T) {
 func TestGet_Collect(t *testing.T) {
 	const (
 		cName         = "splines"
+		dockerCName   = "/splines"
 		cImage        = "bfirsh/reticulate-splines"
 		cAll          = "all"
 		ucListTime    = time.Second * 1
-		ucMetricsTime = time.Millisecond * 500
+		ucMetricsTime = time.Second * 1
 	)
 
 	var (
@@ -53,7 +54,7 @@ func TestGet_Collect(t *testing.T) {
 
 	cMetrics = metrics.Get(cAll)
 	for i, _ := range cMetrics.Launched {
-		if cMetrics.Launched[i] == cName {
+		if cMetrics.Launched[i] == dockerCName {
 			isLaunched = true
 		}
 	}
@@ -67,7 +68,7 @@ func TestGet_Collect(t *testing.T) {
 	pending(ucListTime)
 
 	cMetrics = metrics.Get(cName)
-	assert.Equal(t, cName, cMetrics.Stopped[0])
+	assert.Equal(t, dockerCName, cMetrics.Stopped[0])
 }
 
 func pending(t time.Duration) {

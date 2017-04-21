@@ -27,7 +27,9 @@ func (m *metrics) collect(id string) {
 			m.changes.changes[id] = false
 			m.changes.Unlock()
 
+			m.data.Lock()
 			delete(m.data.data, id)
+			m.data.Unlock()
 
 			return
 		}
