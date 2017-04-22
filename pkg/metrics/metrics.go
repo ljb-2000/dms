@@ -11,12 +11,12 @@ import (
 
 var m metrics
 
-// get metrics
+// Get metrics
 func Get() *metrics {
 	return &m
 }
 
-// create new metrics
+// Create new metrics
 func NewMetrics() (*metrics, error) {
 	logger.Info("new metrics")
 

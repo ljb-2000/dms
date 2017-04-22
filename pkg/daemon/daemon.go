@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-// run daemon
+// Run daemon
 func Run(port string, uctl, ucl int) error {
 	metrics, err := m.NewMetrics()
 	if err != nil {
@@ -30,7 +30,7 @@ func Run(port string, uctl, ucl int) error {
 	return fsrv.ListenAndServe()
 }
 
-// get daemon configuration
+// Get daemon configuration
 func App() *iris.Framework {
 	return app()
 }
