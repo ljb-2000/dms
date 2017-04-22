@@ -9,9 +9,16 @@ import (
 	"time"
 )
 
+var metrics, err = m.NewMetrics()
+
 func TestNewMetrics(t *testing.T) {
-	metrics := m.NewMetrics()
+	assert.NoError(t, err)
 	assert.NotNil(t, metrics)
+}
+
+func TestMultMetrics(t *testing.T) {
+	_, err = m.NewMetrics()
+	assert.Error(t, err)
 }
 
 func TestGet_Collect(t *testing.T) {
@@ -19,7 +26,7 @@ func TestGet_Collect(t *testing.T) {
 		cName         = "splines"
 		cImage        = "bfirsh/reticulate-splines"
 		cAll          = "all"
-		ucListTime    = time.Second * 2
+		ucListTime    = time.Second * 1
 		ucMetricsTime = time.Second * 1
 	)
 
@@ -30,8 +37,7 @@ func TestGet_Collect(t *testing.T) {
 
 	ctx.Debug = false
 
-	metrics := m.NewMetrics()
-	assert.NotNil(t, metrics)
+	metrics = m.Get()
 	metrics.SetUCLTime(ucListTime)
 	metrics.SetUCTime(ucMetricsTime)
 
@@ -40,19 +46,12 @@ func TestGet_Collect(t *testing.T) {
 	cMetrics := metrics.Get(cName)
 	assert.Equal(t, "no running containers", cMetrics.Message)
 
-	err := docker.ImagePull(cImage)
+	err = docker.ImagePull(cImage)
 	assert.NoError(t, err)
 	err = docker.ContainerCreate(cImage, cName)
 	assert.NoError(t, err)
 	err = docker.ContainerStart(cName)
 	assert.NoError(t, err)
-	defer func() {
-		err = docker.ContainerRemove(cName)
-		assert.NoError(t, err)
-
-		err = docker.ImageRemove(cImage)
-		assert.NoError(t, err)
-	}()
 	pending(ucListTime)
 
 	cMetrics = metrics.Get(cAll)
@@ -72,6 +71,16 @@ func TestGet_Collect(t *testing.T) {
 
 	cMetrics = metrics.Get(cAll)
 	assert.Equal(t, cName, cMetrics.Stopped[0])
+
+	err = docker.ContainerStart(cName)
+	assert.NoError(t, err)
+	pending(ucListTime)
+	err = docker.ContainerStop(cName)
+	assert.NoError(t, err)
+	err = docker.ContainerRemove(cName)
+	assert.NoError(t, err)
+	err = docker.ImageRemove(cImage)
+	assert.NoError(t, err)
 }
 
 func pending(t time.Duration) {

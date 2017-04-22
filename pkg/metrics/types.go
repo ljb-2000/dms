@@ -6,9 +6,9 @@ import (
 	"time"
 )
 
-type dataMap struct {
+type metricsMap struct {
 	sync.RWMutex
-	data map[string]*formatter.ContainerStats
+	metrics map[string]*formatter.ContainerStats
 }
 
 type changeMap struct {
@@ -17,10 +17,11 @@ type changeMap struct {
 }
 
 type metrics struct {
-	data       dataMap
+	data       metricsMap
 	changes    changeMap
 	ucListTime time.Duration
 	ucTime     time.Duration
+	isCreated  bool
 }
 
 type metricsAPI struct {

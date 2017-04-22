@@ -14,7 +14,5 @@ func Info(l ...interface{}) {
 }
 
 func Panic(l ...interface{}) {
-	if ctx.Debug {
-		log.Panic(l)
-	}
+	log.Panic(l)
 }

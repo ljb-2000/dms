@@ -1,53 +1,75 @@
 package daemon
 
 import (
-	"github.com/labstack/echo"
-	"github.com/labstack/echo/middleware"
+	dmsLogger "github.com/lavrs/docker-monitoring-service/pkg/logger"
 	m "github.com/lavrs/docker-monitoring-service/pkg/metrics"
-	"html/template"
-	"io"
+	"gopkg.in/kataras/iris.v6"
+	"gopkg.in/kataras/iris.v6/adaptors/cors"
+	"gopkg.in/kataras/iris.v6/adaptors/httprouter"
+	"gopkg.in/kataras/iris.v6/adaptors/view"
+	iLogger "gopkg.in/kataras/iris.v6/middleware/logger"
+	"gopkg.in/kataras/iris.v6/middleware/recover"
 	"net/http"
 	"time"
 )
 
-func Run(port string, ucltime, uctime int) error {
-	const (
-		rootDir       = "website"
-		indexTemplate = "index.html"
-	)
-
-	e := echo.New()
-	e.Use(middleware.CORS())
-	e.Use(middleware.Recover())
-	e.Use(middleware.Logger())
-	e.Use(middleware.Static(rootDir))
-
-	metrics := m.NewMetrics()
-	metrics.SetUCLTime(time.Duration(ucltime) * time.Second)
-	metrics.SetUCTime(time.Duration(uctime) * time.Second)
-
+// run daemon
+func Run(port string, uctl, ucl int) error {
+	metrics, err := m.NewMetrics()
+	if err != nil {
+		dmsLogger.Panic(err)
+	}
+	metrics.SetUCLTime(time.Duration(uctl) * time.Second)
+	metrics.SetUCTime(time.Duration(ucl) * time.Second)
 	go metrics.Collect()
 
-	e.GET("/metrics/:id", func(c echo.Context) error {
-		return c.JSON(http.StatusOK, metrics.Get(c.Param("id")))
-	})
-
-	e.GET("/charts", func(c echo.Context) error {
-		t := &Template{
-			templates: template.Must(template.ParseGlob(rootDir + "/" + indexTemplate)),
-		}
-		e.Renderer = t
-
-		return c.Render(http.StatusOK, indexTemplate, nil)
-	})
-
-	return e.Start(":" + port)
+	fsrv := &http.Server{
+		Handler: App(),
+		Addr:    ":" + port,
+	}
+	return fsrv.ListenAndServe()
 }
 
-type Template struct {
-	templates *template.Template
+// get daemon configuration
+func App() *iris.Framework {
+	return app()
 }
 
-func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
-	return t.templates.ExecuteTemplate(w, name, data)
+func app() *iris.Framework {
+	app := iris.New()
+	app.Adapt(
+		httprouter.New(),
+		iris.DevLogger(),
+		cors.New(cors.Options{AllowedOrigins: []string{"*"}}),
+		view.HTML("./website", ".html"),
+	)
+	app.Use(
+		recover.New(),
+		iLogger.New(iLogger.Config{
+			Status: true,
+			IP:     true,
+			Method: true,
+			Path:   true,
+		}),
+	)
+	app.StaticWeb("/static", "website/static")
+
+	app.Get("/api/metrics/:id", getMetrics)
+	app.OnError(iris.StatusNotFound, p404)
+	app.Get("/charts", charts)
+
+	app.Boot()
+	return app
+}
+
+func charts(ctx *iris.Context) {
+	ctx.MustRender("index.html", nil)
+}
+
+func p404(ctx *iris.Context) {
+	ctx.MustRender("404.html", nil)
+}
+
+func getMetrics(ctx *iris.Context) {
+	ctx.JSON(iris.StatusOK, m.Get().Get(ctx.Param("id")))
 }

@@ -47,11 +47,7 @@ func main() {
 		ctx := context.Get()
 		ctx.Debug = c.Bool("d")
 
-		err := daemon.Run(c.String("p"), c.Int("uclt"), c.Int("uct"))
-		if err != nil {
-			return err
-		}
-		return nil
+		return daemon.Run(c.String("p"), c.Int("uclt"), c.Int("uct"))
 	}
 
 	err := app.Run(os.Args)

@@ -4,17 +4,33 @@ import (
 	"github.com/docker/docker/cli/command/formatter"
 	"github.com/lavrs/docker-monitoring-service/pkg/docker"
 	"github.com/lavrs/docker-monitoring-service/pkg/logger"
+	"github.com/pkg/errors"
 	"strings"
 	"time"
 )
 
-func NewMetrics() *metrics {
-	return &metrics{
-		data:       dataMap{data: make(map[string]*formatter.ContainerStats)},
-		changes:    changeMap{changes: make(map[string]bool)},
-		ucListTime: time.Second * 3,
-		ucTime:     time.Second,
+var m metrics
+
+// get metrics
+func Get() *metrics {
+	return &m
+}
+
+// create new metrics
+func NewMetrics() (*metrics, error) {
+	logger.Info("new metrics")
+
+	if m.isCreated {
+		return nil, errors.New("metrics already create")
 	}
+
+	m.isCreated = true
+	m.data = metricsMap{metrics: make(map[string]*formatter.ContainerStats)}
+	m.changes = changeMap{changes: make(map[string]bool)}
+	m.ucListTime = time.Second * 3
+	m.ucTime = time.Second
+
+	return &m, nil
 }
 
 func (m *metrics) SetUCLTime(t time.Duration) {
@@ -26,15 +42,17 @@ func (m *metrics) SetUCTime(t time.Duration) {
 }
 
 func (m *metrics) Collect() {
+    logger.Info(m.ucListTime)
 	for range time.Tick(m.ucListTime) {
 		containers, err := docker.ContainerList()
 		if err != nil {
 			logger.Panic(err)
 		}
+        logger.Info(containers)
 
 		for _, container := range *containers {
-			if _, ok := m.data.data[container.Names[0][1:]]; !ok {
-				logger.Info("new container", m.data.data[container.Names[0][1:]])
+			if _, ok := m.data.metrics[container.Names[0][1:]]; !ok {
+				logger.Info("new container `", container.Names[0][1:], "`")
 
 				go m.collect(container.Names[0][1:])
 			}
@@ -55,7 +73,7 @@ func (m *metrics) Get(id string) *metricsAPI {
 
 	if id == "all" {
 		m.data.RLock()
-		for _, d := range m.data.data {
+		for _, d := range m.data.metrics {
 			ids = append(ids, d.Name)
 		}
 		m.data.RUnlock()
@@ -83,22 +101,21 @@ func (m *metrics) Get(id string) *metricsAPI {
 		logger.Info("no new containers")
 	}
 
-	if len(m.data.data) == 0 {
+	if len(m.data.metrics) == 0 {
+		logger.Info("no running container")
 		return &metricsAPI{
 			Launched: launched,
 			Stopped:  stopped,
 			Message:  "no running containers",
 		}
-	} else {
-		logger.Info("no running container")
 	}
 
 	m.data.RLock()
 	for _, id := range ids {
-		if data, ok := m.data.data[id]; ok {
+		if data, ok := m.data.metrics[id]; ok {
 			metrics = append(metrics, data)
 		} else {
-			logger.Info("container ", id, "are not running")
+			logger.Info("container `", id, "` are not running")
 			isNotExist++
 		}
 	}
@@ -112,6 +129,7 @@ func (m *metrics) Get(id string) *metricsAPI {
 		}
 	}
 
+	logger.Info("return metrics")
 	return &metricsAPI{
 		Metrics:  &metrics,
 		Launched: launched,

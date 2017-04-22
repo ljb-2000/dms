@@ -40,13 +40,13 @@ Content-Type: application/json
   "message": "message"
 }
 ```
-### CLI Usage (run daemon)
+### CLI Usage (daemon)
 ```
 NAME:
-   daemon: run.exe - A new cli application
+   daemon: dms - A new cli application
 
 USAGE:
-   daemon: run.exe [global options] command [command options] [arguments...]
+   daemon: dms [global options] command [command options] [arguments...]
 
 VERSION:
    0.1.0

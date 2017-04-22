@@ -17,7 +17,7 @@ func (m *metrics) collect(id string) {
 		metrics, err := one(id)
 		if err != nil {
 			if err == io.EOF {
-				logger.Info("container ", id, "removed")
+				logger.Info("container `", id, "` removed")
 				m.removeCFromMap(id)
 				return
 			}
@@ -25,13 +25,13 @@ func (m *metrics) collect(id string) {
 		}
 
 		if metrics.CPUPercentage == 0 {
-			logger.Info("container ", id, "stopped")
+			logger.Info("container `", id, "` stopped")
 			m.removeCFromMap(id)
 			return
 		}
 
 		m.data.Lock()
-		m.data.data[id] = metrics
+		m.data.metrics[id] = metrics
 		m.data.Unlock()
 	}
 }
@@ -42,7 +42,7 @@ func (m *metrics) removeCFromMap(id string) {
 	m.changes.Unlock()
 
 	m.data.Lock()
-	delete(m.data.data, id)
+	delete(m.data.metrics, id)
 	m.data.Unlock()
 }
 
@@ -52,5 +52,5 @@ func one(id string) (*formatter.ContainerStats, error) {
 		return nil, err
 	}
 
-	return docker.Formatting(statsJSON), nil
+	return statsJSON, nil
 }
