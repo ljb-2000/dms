@@ -13,7 +13,7 @@ func (m *metrics) collect(id string) {
 	m.changes.changes[id] = true
 	m.changes.Unlock()
 
-	for range time.Tick(m.ucTime) {
+	for range time.Tick(m.uCMetricsInterval) {
 		metrics, err := one(id)
 		if err != nil {
 			if err == io.EOF {
@@ -30,9 +30,9 @@ func (m *metrics) collect(id string) {
 			return
 		}
 
-		m.data.Lock()
-		m.data.metrics[id] = metrics
-		m.data.Unlock()
+		m.metrics.Lock()
+		m.metrics.metrics[id] = metrics
+		m.metrics.Unlock()
 	}
 }
 
@@ -41,9 +41,9 @@ func (m *metrics) removeCFromMap(id string) {
 	m.changes.changes[id] = false
 	m.changes.Unlock()
 
-	m.data.Lock()
-	delete(m.data.metrics, id)
-	m.data.Unlock()
+	m.metrics.Lock()
+	delete(m.metrics.metrics, id)
+	m.metrics.Unlock()
 }
 
 func one(id string) (*formatter.ContainerStats, error) {

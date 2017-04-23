@@ -9,16 +9,9 @@ import (
 	"time"
 )
 
-var metrics, err = m.NewMetrics()
-
 func TestNewMetrics(t *testing.T) {
-	assert.NoError(t, err)
+	metrics := m.Get()
 	assert.NotNil(t, metrics)
-}
-
-func TestMultMetrics(t *testing.T) {
-	_, err = m.NewMetrics()
-	assert.Error(t, err)
 }
 
 func TestGet_Collect(t *testing.T) {
@@ -37,16 +30,16 @@ func TestGet_Collect(t *testing.T) {
 
 	ctx.Debug = false
 
-	metrics = m.Get()
-	metrics.SetUCLTime(ucListTime)
-	metrics.SetUCTime(ucMetricsTime)
+	metrics := m.Get()
+	metrics.SetUCListInterval(ucListTime)
+	metrics.SetUCMetricsInterval(ucMetricsTime)
 
 	go metrics.Collect()
 
 	cMetrics := metrics.Get(cName)
 	assert.Equal(t, "no running containers", cMetrics.Message)
 
-	err = docker.ImagePull(cImage)
+	err := docker.ImagePull(cImage)
 	assert.NoError(t, err)
 	err = docker.ContainerCreate(cImage, cName)
 	assert.NoError(t, err)

@@ -17,11 +17,10 @@ type changeMap struct {
 }
 
 type metrics struct {
-	data       metricsMap
-	changes    changeMap
-	ucListTime time.Duration
-	ucTime     time.Duration
-	isCreated  bool
+	metrics           metricsMap
+	changes           changeMap
+	uCListInterval    time.Duration
+	uCMetricsInterval time.Duration
 }
 
 type metricsAPI struct {

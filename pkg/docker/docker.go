@@ -11,7 +11,7 @@ import (
 	"github.com/lavrs/docker-monitoring-service/pkg/logger"
 	"io"
 	"os"
-    "time"
+	"time"
 )
 
 var (
@@ -92,7 +92,7 @@ func ImagePull(cImage string) error {
 
 // Stops the container
 func ContainerStop(cName string) error {
-    t := time.Duration(0)
+	t := time.Duration(0)
 	err := cli.ContainerStop(context.Background(), cName, &t)
 	if err != nil {
 		return err

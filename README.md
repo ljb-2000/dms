@@ -2,8 +2,9 @@
 # Docker monitoring service
 This service allows you to monitor the loading of the docker container in real time with the ability to view load charts
 ### View load charts
-1. Run dms daemon
-2. Open http://localhost:4222/charts
+1. cd cmd/daemon/
+2. go run daemon.go
+3. http://localhost:4222/charts
 ### API Usage
 REQUEST
 ```
@@ -40,7 +41,7 @@ Content-Type: application/json
   "message": "message"
 }
 ```
-### CLI Usage (daemon)
+### CLI Usage
 ```
 NAME:
    daemon: dms - A new cli application

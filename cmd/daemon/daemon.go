@@ -20,14 +20,14 @@ func main() {
 			Usage: "set daemon port",
 		},
 		cli.IntFlag{
-			Name:  "uct, upd-container-time",
-			Value: 1,
-			Usage: "set update container interval",
-		},
-		cli.IntFlag{
-			Name:  "uclt, upd-container-list-time",
+			Name:  "ucli, upd-container-list-interval",
 			Value: 3,
 			Usage: "set update container list interval",
+		},
+		cli.IntFlag{
+			Name:  "uci, upd-container-interval",
+			Value: 1,
+			Usage: "set update container metrics interval",
 		},
 		cli.BoolFlag{
 			Name:  "d, debug",
@@ -47,7 +47,7 @@ func main() {
 		ctx := context.Get()
 		ctx.Debug = c.Bool("d")
 
-		return daemon.Run(c.String("p"), c.Int("uclt"), c.Int("uct"))
+		return daemon.Run(c.String("p"), c.Int("ucli"), c.Int("uci"))
 	}
 
 	err := app.Run(os.Args)
