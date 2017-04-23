@@ -11,6 +11,8 @@ import (
 func main() {
 	app := cli.NewApp()
 
+	app.Name = "dms"
+	app.Usage = "Docker monitoring service"
 	app.Version = "0.1.0"
 
 	app.Flags = []cli.Flag{
