@@ -1,6 +1,7 @@
 package docker_test
 
 import (
+	"github.com/docker/docker/cli/command/formatter"
 	"github.com/lavrs/docker-monitoring-service/pkg/docker"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -33,9 +34,30 @@ func TestContainerList(t *testing.T) {
 }
 
 func TestContainerStats(t *testing.T) {
-	stats, err := docker.ContainerStats(cName)
+	var (
+		err error
+
+		data  = make(chan *formatter.ContainerStats)
+		gDone = make(chan bool)
+		done  = make(chan bool)
+	)
+
+	go func() {
+		err = docker.ContainerStats(cName, data, done)
+		close(gDone)
+	}()
+
+	<-data
+	close(done)
+	close(data)
+	<-gDone
+
 	assert.NoError(t, err)
-	assert.NotNil(t, stats)
+}
+
+func TestContainersLogs(t *testing.T) {
+	_, err := docker.ContainersLogs(cName)
+	assert.NoError(t, err)
 }
 
 func TestContainerStop(t *testing.T) {

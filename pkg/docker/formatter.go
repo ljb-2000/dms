@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func Formatting(statsJSON *types.StatsJSON) *formatter.ContainerStats {
+func formatting(statsJSON *types.StatsJSON) *formatter.ContainerStats {
 	var stats formatter.ContainerStats
 
 	read, write := parseBlockIO(statsJSON.BlkioStats)

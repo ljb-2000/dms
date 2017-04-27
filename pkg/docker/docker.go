@@ -10,6 +10,7 @@ import (
 	"github.com/docker/docker/client"
 	"github.com/lavrs/docker-monitoring-service/pkg/logger"
 	"io"
+	"io/ioutil"
 	"os"
 	"time"
 )
@@ -37,21 +38,30 @@ func ContainerList() (*[]types.Container, error) {
 }
 
 // Returns the metric of the container
-func ContainerStats(id string) (*formatter.ContainerStats, error) {
+func ContainerStats(id string, data chan *formatter.ContainerStats, done chan bool) error {
 	stats, err := cli.ContainerStats(context.Background(), id, true)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	defer stats.Body.Close()
 
 	dec := json.NewDecoder(stats.Body)
 	var statsJSON *types.StatsJSON
-	err = dec.Decode(&statsJSON)
-	if err != nil {
-		return nil, err
-	}
 
-	return Formatting(statsJSON), nil
+	for {
+		err = dec.Decode(&statsJSON)
+		if err != nil {
+			return err
+		}
+
+		select {
+		case <-done:
+			return nil
+		default:
+		}
+
+		data <- formatting(statsJSON)
+	}
 }
 
 // Create container
@@ -113,10 +123,29 @@ func ImageRemove(cImage string) error {
 
 // Removes container
 func ContainerRemove(cName string) error {
-	err := cli.ContainerRemove(context.Background(), cName, types.ContainerRemoveOptions{})
+	err := cli.ContainerRemove(context.Background(), cName, types.ContainerRemoveOptions{
+		Force: true,
+	})
 	if err != nil {
 		return err
 	}
 
 	return nil
+}
+
+// Containers logs
+func ContainersLogs(cName string) (string, error) {
+	reader, err := cli.ContainerLogs(context.Background(), cName, types.ContainerLogsOptions{
+		ShowStdout: true,
+	})
+	if err != nil {
+		return "", err
+	}
+	defer reader.Close()
+
+	logs, err := ioutil.ReadAll(reader)
+	if err != nil {
+		return "", err
+	}
+	return string(logs), nil
 }

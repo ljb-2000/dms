@@ -29,13 +29,11 @@ func (m *metrics) SetUCListInterval(t time.Duration) {
 }
 
 func (m *metrics) Collect() {
-	logger.Info(m.uCListInterval)
 	for range time.Tick(m.uCListInterval) {
 		containers, err := docker.ContainerList()
 		if err != nil {
 			logger.Panic(err)
 		}
-		logger.Info(containers)
 
 		for _, container := range *containers {
 			if _, ok := m.metrics.metrics[container.Names[0][1:]]; !ok {
@@ -79,11 +77,11 @@ func (m *metrics) Get(id string) *metricsAPI {
 				stopped = append(stopped, id)
 			}
 		}
-		m.changes.RUnlock()
 
 		for k := range m.changes.changes {
 			delete(m.changes.changes, k)
 		}
+		m.changes.RUnlock()
 	} else {
 		logger.Info("no new containers")
 	}
