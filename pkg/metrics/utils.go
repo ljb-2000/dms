@@ -1,7 +1,8 @@
 package metrics
 
 import (
-	"github.com/docker/docker/cli/command/formatter"
+	"encoding/json"
+	"github.com/docker/docker/api/types"
 	"github.com/lavrs/docker-monitoring-service/pkg/docker"
 	"github.com/lavrs/docker-monitoring-service/pkg/logger"
 	"io"
@@ -13,31 +14,30 @@ func (m *metrics) collect(id string) {
 	m.changes.changes[id] = true
 	m.changes.Unlock()
 
-	var (
-		metrics *formatter.ContainerStats
-		data    = make(chan *formatter.ContainerStats)
-		done    = make(chan bool)
-		err     error
-	)
+	reader, err := docker.ContainerStats(id)
+	if err != nil {
+		logger.Panic(err)
+	}
+	defer reader.Close()
 
-	go func() {
-		err = docker.ContainerStats(id, data, done)
+	dec := json.NewDecoder(reader)
+	var statsJSON *types.StatsJSON
+
+	for range time.Tick(m.uCMetricsInterval) {
+		err = dec.Decode(&statsJSON)
 		if err != nil {
 			if err == io.EOF {
 				logger.Info("container `", id, "` removed")
-				m.removeCFromMap(id, data, done)
+				m.removeCFromMap(id)
 				return
 			}
-			logger.Panic(err)
 		}
-	}()
 
-	for range time.Tick(m.uCMetricsInterval) {
-		metrics = <-data
+		metrics := docker.Formatting(statsJSON)
 
 		if metrics.CPUPercentage == 0 {
 			logger.Info("container `", id, "` stopped")
-			m.removeCFromMap(id, data, done)
+			m.removeCFromMap(id)
 			return
 		}
 
@@ -47,7 +47,7 @@ func (m *metrics) collect(id string) {
 	}
 }
 
-func (m *metrics) removeCFromMap(id string, data chan *formatter.ContainerStats, done chan bool) {
+func (m *metrics) removeCFromMap(id string) {
 	m.changes.Lock()
 	m.changes.changes[id] = false
 	m.changes.Unlock()
@@ -55,7 +55,4 @@ func (m *metrics) removeCFromMap(id string, data chan *formatter.ContainerStats,
 	m.metrics.Lock()
 	delete(m.metrics.metrics, id)
 	m.metrics.Unlock()
-
-	close(done)
-	close(data)
 }

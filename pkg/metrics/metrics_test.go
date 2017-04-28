@@ -68,10 +68,9 @@ func TestGet_Collect(t *testing.T) {
 	err = docker.ContainerStart(cName)
 	assert.NoError(t, err)
 	pending(ucListTime)
-	err = docker.ContainerStop(cName)
-	assert.NoError(t, err)
 	err = docker.ContainerRemove(cName)
 	assert.NoError(t, err)
+	pending(ucListTime)
 	err = docker.ImageRemove(cImage)
 	assert.NoError(t, err)
 }

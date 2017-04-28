@@ -1,7 +1,8 @@
 package docker_test
 
 import (
-	"github.com/docker/docker/cli/command/formatter"
+	"encoding/json"
+	"github.com/docker/docker/api/types"
 	"github.com/lavrs/docker-monitoring-service/pkg/docker"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -34,25 +35,21 @@ func TestContainerList(t *testing.T) {
 }
 
 func TestContainerStats(t *testing.T) {
-	var (
-		err error
-
-		data  = make(chan *formatter.ContainerStats)
-		gDone = make(chan bool)
-		done  = make(chan bool)
-	)
-
-	go func() {
-		err = docker.ContainerStats(cName, data, done)
-		close(gDone)
-	}()
-
-	<-data
-	close(done)
-	close(data)
-	<-gDone
-
+	reader, err := docker.ContainerStats(cName)
 	assert.NoError(t, err)
+	assert.NotNil(t, reader)
+}
+
+func TestFormatting(t *testing.T) {
+	reader, err := docker.ContainerStats(cName)
+	assert.NoError(t, err)
+
+	dec := json.NewDecoder(reader)
+	var statsJSON *types.StatsJSON
+	err = dec.Decode(&statsJSON)
+	assert.NoError(t, err)
+
+	assert.NotNil(t, docker.Formatting(statsJSON))
 }
 
 func TestContainersLogs(t *testing.T) {
