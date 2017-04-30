@@ -46,8 +46,8 @@ func main() {
 			return nil
 		}
 
-		ctx := context.Get()
-		ctx.Debug = c.Bool("d")
+        // set debug mode
+		context.Get().Debug = c.Bool("d")
 
 		return daemon.Run(c.String("p"), c.Int("ucli"), c.Int("uci"))
 	}

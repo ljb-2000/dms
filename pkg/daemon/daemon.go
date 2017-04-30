@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-// Run daemon
+// run daemon
 func Run(port string, ucli, uci int) error {
 	metrics := m.Get()
 	metrics.SetUCListInterval(time.Duration(ucli) * time.Second)

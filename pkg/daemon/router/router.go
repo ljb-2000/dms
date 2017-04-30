@@ -12,11 +12,12 @@ import (
 	"gopkg.in/kataras/iris.v6/middleware/recover"
 )
 
-// Get daemon configuration
+// get daemon configuration
 func App() *iris.Framework {
 	return app()
 }
 
+// iris configuration
 func app() *iris.Framework {
 	app := iris.New()
 	app.Adapt(
@@ -26,7 +27,6 @@ func app() *iris.Framework {
 	)
 	app.Use(recover.New())
 	app.StaticWeb("/static", "website/static")
-
 	if context.Get().Debug {
 		app.Use(
 			logger.New(logger.Config{
@@ -48,25 +48,28 @@ func app() *iris.Framework {
 	return app
 }
 
+// charts page
 func charts(ctx *iris.Context) {
 	ctx.MustRender("index.html", nil)
 }
 
+// 404 page
 func p404(ctx *iris.Context) {
 	ctx.MustRender("404.html", nil)
 }
 
+// get container metrics
 func getMetrics(ctx *iris.Context) {
 	ctx.JSON(iris.StatusOK, metrics.Get().Get(ctx.Param("id")))
 }
 
+// get container logs
 func getLogs(ctx *iris.Context) {
 	logs, err := docker.ContainersLogs(ctx.Param("id"))
 	if err != nil {
 		ctx.JSON(iris.StatusOK, map[string]string{
 			"message": err.Error(),
 		})
-
 		return
 	}
 

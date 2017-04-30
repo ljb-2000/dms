@@ -16,6 +16,7 @@ type changeMap struct {
 	changes map[string]bool
 }
 
+// type for collect metrics
 type metrics struct {
 	metrics           metricsMap
 	changes           changeMap
@@ -23,6 +24,7 @@ type metrics struct {
 	uCMetricsInterval time.Duration
 }
 
+// type for API
 type metricsAPI struct {
 	Metrics  *[]*formatter.ContainerStats `json:"metrics,omitempty"`
 	Launched []string                     `json:"launched,omitempty"`

@@ -7,6 +7,7 @@ import (
 	"strings"
 )
 
+// get the basic metrics from all
 func Formatting(statsJSON *types.StatsJSON) *formatter.ContainerStats {
 	var stats formatter.ContainerStats
 
@@ -30,6 +31,7 @@ func Formatting(statsJSON *types.StatsJSON) *formatter.ContainerStats {
 	return &stats
 }
 
+// parse memory (returns memory in percentages)
 func parseMemory(statsJSON *types.StatsJSON) float64 {
 	mem := float64(statsJSON.MemoryStats.Usage) / float64(statsJSON.MemoryStats.Limit) * 100.0
 
@@ -39,6 +41,7 @@ func parseMemory(statsJSON *types.StatsJSON) float64 {
 	return mem
 }
 
+// parse network metrics
 func parseNetwork(net map[string]types.NetworkStats) (float64, float64) {
 	var rx, tx float64
 
@@ -50,6 +53,7 @@ func parseNetwork(net map[string]types.NetworkStats) (float64, float64) {
 	return rx, tx
 }
 
+// parse cpu (returns cpu in percentages)
 func parseCPU(statsJSON *types.StatsJSON) float64 {
 	var (
 		cpuPercent = 0.0
@@ -69,6 +73,7 @@ func parseCPU(statsJSON *types.StatsJSON) float64 {
 	return cpuPercent
 }
 
+// parse r/w blks metrics
 func parseBlockIO(blkioStats types.BlkioStats) (uint64, uint64) {
 	var (
 		blkRead  uint64
