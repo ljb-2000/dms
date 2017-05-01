@@ -25,7 +25,7 @@ func init() {
 	}
 }
 
-// returns a list of running containers
+// ContainerList returns a list of running containers
 func ContainerList() (*[]types.Container, error) {
 	containers, err := cli.ContainerList(context.Background(), types.ContainerListOptions{})
 	if err != nil {
@@ -35,7 +35,7 @@ func ContainerList() (*[]types.Container, error) {
 	return &containers, nil
 }
 
-// returns container metrics channel
+// ContainerStats returns container metrics channel
 func ContainerStats(id string) (io.ReadCloser, error) {
 	cStats, err := cli.ContainerStats(context.Background(), id, true)
 	if err != nil {
@@ -45,7 +45,7 @@ func ContainerStats(id string) (io.ReadCloser, error) {
 	return cStats.Body, nil
 }
 
-// create container
+// ContainerCreate create container
 func ContainerCreate(cImage, cName string) error {
 	_, err := cli.ContainerCreate(context.Background(), &c.Config{
 		Image: cImage,
@@ -57,7 +57,7 @@ func ContainerCreate(cImage, cName string) error {
 	return nil
 }
 
-// launches container
+// ContainerStart launches container
 func ContainerStart(cName string) error {
 	err = cli.ContainerStart(context.Background(), cName, types.ContainerStartOptions{})
 	if err != nil {
@@ -67,7 +67,7 @@ func ContainerStart(cName string) error {
 	return nil
 }
 
-// download image
+// ImagePull download image
 func ImagePull(cImage string) error {
 	out, err := cli.ImagePull(context.Background(), cImage, types.ImagePullOptions{})
 	if err != nil {
@@ -81,7 +81,7 @@ func ImagePull(cImage string) error {
 	return nil
 }
 
-// stops the container
+// ContainerStop stops the container
 func ContainerStop(cName string) error {
 	t := time.Duration(0)
 	err := cli.ContainerStop(context.Background(), cName, &t)
@@ -92,7 +92,7 @@ func ContainerStop(cName string) error {
 	return nil
 }
 
-// removes image
+// ImageRemove removes image
 func ImageRemove(cImage string) error {
 	_, err := cli.ImageRemove(context.Background(), cImage, types.ImageRemoveOptions{})
 	if err != nil {
@@ -102,11 +102,10 @@ func ImageRemove(cImage string) error {
 	return nil
 }
 
-// removes container
+// ContainerRemove removes container
 func ContainerRemove(cName string) error {
 	err := cli.ContainerRemove(context.Background(), cName, types.ContainerRemoveOptions{
 		RemoveVolumes: true,
-		RemoveLinks:   true,
 		Force:         true,
 	})
 	if err != nil {
@@ -116,7 +115,7 @@ func ContainerRemove(cName string) error {
 	return nil
 }
 
-// returns containers logs
+// ContainersLogs returns containers logs
 func ContainersLogs(cName string) (string, error) {
 	reader, err := cli.ContainerLogs(context.Background(), cName, types.ContainerLogsOptions{
 		ShowStdout: true,

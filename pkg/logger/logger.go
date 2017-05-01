@@ -5,14 +5,14 @@ import (
 	"github.com/lavrs/docker-monitoring-service/pkg/context"
 )
 
-// info log
+// Info print info log
 func Info(l ...interface{}) {
 	if context.Get().Debug {
 		log.Info(l)
 	}
 }
 
-// panic log
+// Panic print panic log
 func Panic(l ...interface{}) {
 	log.Panic(l)
 }

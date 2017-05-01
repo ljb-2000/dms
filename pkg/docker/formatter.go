@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-// get the basic metrics from all
+// Formatting returns the basic metrics from all
 func Formatting(statsJSON *types.StatsJSON) *formatter.ContainerStats {
 	var stats formatter.ContainerStats
 

@@ -16,22 +16,22 @@ var m = &metrics{
 	uCMetricsInterval: time.Second * 1,
 }
 
-// get metrics obj
+// Get returns metrics obj
 func Get() *metrics {
 	return m
 }
 
-// set update container metrics interval
+// SetUCMetricsInterval set update container metrics interval
 func (m *metrics) SetUCMetricsInterval(t time.Duration) {
 	m.uCMetricsInterval = t
 }
 
-// set update containers list interval
+// SetUCListInterval set update containers list interval
 func (m *metrics) SetUCListInterval(t time.Duration) {
 	m.uCListInterval = t
 }
 
-// collect metrics (check new containers)
+// Collect collect metrics (check new containers)
 func (m *metrics) Collect() {
 	for range time.Tick(m.uCListInterval) {
 		containers, err := docker.ContainerList()
@@ -43,14 +43,14 @@ func (m *metrics) Collect() {
 			if _, ok := m.metrics.metrics[container.Names[0][1:]]; !ok {
 				logger.Info("new container `", container.Names[0][1:], "`")
 
-                // start collect new metrics
+				// start collect new metrics
 				go m.collect(container.Names[0][1:])
 			}
 		}
 	}
 }
 
-// returns container(s) metrics
+// Get returns container(s) metrics
 func (m *metrics) Get(id string) *metricsAPI {
 	logger.Info("get container(s) metrics")
 
@@ -62,6 +62,7 @@ func (m *metrics) Get(id string) *metricsAPI {
 		isNotExist = 0
 	)
 
+	// parse id (all / one / ... containers)
 	if id == "all" {
 		m.metrics.RLock()
 		for _, d := range m.metrics.metrics {

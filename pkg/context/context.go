@@ -6,7 +6,7 @@ type Context struct {
 	Debug bool
 }
 
-// return context obj
+// Get returns context obj
 func Get() *Context {
 	return &context
 }

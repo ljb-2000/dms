@@ -12,7 +12,7 @@ import (
 	"gopkg.in/kataras/iris.v6/middleware/recover"
 )
 
-// get daemon configuration
+// App returns daemon configuration
 func App() *iris.Framework {
 	return app()
 }

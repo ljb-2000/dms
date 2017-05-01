@@ -32,7 +32,7 @@ func (m *metrics) collect(id string) {
 			// container removed
 			if err == io.EOF {
 				logger.Info("container `", id, "` removed")
-				m.removeCFromMap(id)
+				m.removeCFromMaps(id)
 				return
 			}
 			logger.Panic(err)
@@ -44,7 +44,7 @@ func (m *metrics) collect(id string) {
 		// container stopped
 		if metrics.CPUPercentage == 0 {
 			logger.Info("container `", id, "` stopped")
-			m.removeCFromMap(id)
+			m.removeCFromMaps(id)
 			return
 		}
 
@@ -56,8 +56,8 @@ func (m *metrics) collect(id string) {
 }
 
 // clear metrics from map
-func (m *metrics) removeCFromMap(id string) {
-    // added to stopped containers array
+func (m *metrics) removeCFromMaps(id string) {
+	// added to stopped containers array
 	m.changes.Lock()
 	m.changes.changes[id] = false
 	m.changes.Unlock()

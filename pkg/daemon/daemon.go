@@ -7,12 +7,11 @@ import (
 	"time"
 )
 
-// run daemon
+// Run start daemon
 func Run(port string, ucli, uci int) error {
-	metrics := m.Get()
-	metrics.SetUCListInterval(time.Duration(ucli) * time.Second)
-	metrics.SetUCMetricsInterval(time.Duration(uci) * time.Second)
-	go metrics.Collect()
+	m.Get().SetUCListInterval(time.Duration(ucli) * time.Second)
+	m.Get().SetUCMetricsInterval(time.Duration(uci) * time.Second)
+	go m.Get().Collect()
 
 	fsrv := &http.Server{
 		Handler: router.App(),
