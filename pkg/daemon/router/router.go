@@ -2,7 +2,6 @@ package router
 
 import (
 	"github.com/lavrs/docker-monitoring-service/pkg/context"
-	"github.com/lavrs/docker-monitoring-service/pkg/docker"
 	"github.com/lavrs/docker-monitoring-service/pkg/metrics"
 	"gopkg.in/kataras/iris.v6"
 	"gopkg.in/kataras/iris.v6/adaptors/cors"
@@ -39,10 +38,12 @@ func app() *iris.Framework {
 		app.Adapt(iris.DevLogger())
 	}
 
-	app.Get("/api/metrics/:id", getMetrics)
-	app.OnError(iris.StatusNotFound, p404)
 	app.Get("/charts", charts)
+	app.OnError(iris.StatusNotFound, p404)
 	app.Get("/api/logs/:id", getLogs)
+	app.Get("/api/metrics/:id", getMetrics)
+	app.Get("/api/stopped", getStopped)
+	app.Get("/api/launched", getLaunched)
 
 	app.Boot()
 	return app
@@ -63,15 +64,23 @@ func getMetrics(ctx *iris.Context) {
 	ctx.JSON(iris.StatusOK, metrics.Get().Get(ctx.Param("id")))
 }
 
+// get stopped containers
+func getStopped(ctx *iris.Context) {
+	ctx.JSON(iris.StatusOK, map[string][]string{
+		"stopped": metrics.Get().GetStoppedContainers(),
+	})
+}
+
+// get launched containers
+func getLaunched(ctx *iris.Context) {
+	ctx.JSON(iris.StatusOK, map[string][]string{
+		"launched": metrics.Get().GetLaunchedContainers(),
+	})
+}
+
 // get container logs
 func getLogs(ctx *iris.Context) {
-	logs, err := docker.ContainersLogs(ctx.Param("id"))
-	if err != nil {
-		ctx.JSON(iris.StatusOK, map[string]string{
-			"message": err.Error(),
-		})
-		return
-	}
-
-	ctx.JSON(iris.StatusOK, logs)
+	ctx.JSON(iris.StatusOK, map[string]string{
+		"logs": *metrics.GetContainerLogs(ctx.Param("id")),
+	})
 }

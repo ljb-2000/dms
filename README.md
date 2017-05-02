@@ -9,9 +9,10 @@ $ go run daemon.go
 $ http://localhost:4222/charts
 ```
 ### API Usage
+#### Get container(s) metrics
 REQUEST
 ```
-GET /metrics/:id HTTP/1.1
+GET /api/metrics/:id HTTP/1.1
 ```
 RESPONSE
 ```
@@ -42,6 +43,45 @@ Content-Type: application/json
     "container2"
   ],
   "message": "message"
+}
+```
+#### Get container logs
+REQUEST
+```
+GET /api/logs/:id HTTP/1.1
+```
+RESPONSE
+```
+HTTP/1.1 200 OK
+Content-Type: application/json
+{
+  "logs": "logs"
+}
+```
+#### Get stopped containers
+REQUEST
+```
+GET /api/stopped HTTP/1.1
+```
+RESPONSE
+```
+HTTP/1.1 200 OK
+Content-Type: application/json
+{
+  "stopped": ["container"]
+}
+```
+#### Get launched containers
+REQUEST
+```
+GET /api/launched HTTP/1.1
+```
+RESPONSE
+```
+HTTP/1.1 200 OK
+Content-Type: application/json
+{
+  "launched": ["container"]
 }
 ```
 ### CLI Usage

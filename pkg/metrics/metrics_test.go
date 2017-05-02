@@ -24,16 +24,15 @@ func TestGet_Collect(t *testing.T) {
 	)
 
 	var (
-		isLaunched = false
-		ctx        = context.Get()
+		isChange = false
+		ctx      = context.Get()
 	)
 
-	ctx.Debug = false
+	ctx.Debug = true
 
 	metrics := m.Get()
 	metrics.SetUCListInterval(ucListTime)
 	metrics.SetUCMetricsInterval(ucMetricsTime)
-
 	go metrics.Collect()
 
 	cMetrics := metrics.Get(cName)
@@ -47,13 +46,49 @@ func TestGet_Collect(t *testing.T) {
 	assert.NoError(t, err)
 	pending(ucListTime)
 
+	logs := m.GetContainerLogs(cName)
+	assert.NotEmpty(t, logs)
+
+    isChange = false
+    launched := metrics.GetLaunchedContainers()
+    for i := range launched {
+        if launched[i] == cName {
+            isChange = true
+        }
+    }
+    assert.True(t, isChange)
+
 	cMetrics = metrics.Get(cAll)
-	for i, _ := range cMetrics.Launched {
+	for i := range cMetrics.Launched {
 		if cMetrics.Launched[i] == cName {
-			isLaunched = true
+			isChange = true
 		}
 	}
-	assert.True(t, isLaunched)
+	assert.True(t, isChange)
+
+    isChange = false
+    launched = metrics.GetLaunchedContainers()
+    for i := range launched {
+        if launched[i] == cName {
+            isChange = true
+        }
+    }
+    assert.False(t, isChange)
+
+	isChange = false
+	stopped := metrics.GetStoppedContainers()
+	for i := range stopped {
+		if stopped[i] == cName {
+			isChange = true
+		}
+	}
+	assert.False(t, isChange)
+
+	err = docker.ContainerStop(cName)
+	assert.NoError(t, err)
+	err = docker.ContainerStart(cName)
+	assert.NoError(t, err)
+	pending(ucListTime)
 
 	cMetrics = metrics.Get("container1 container2")
 	assert.Equal(t, "these containers are not running", cMetrics.Message)
@@ -61,6 +96,15 @@ func TestGet_Collect(t *testing.T) {
 	err = docker.ContainerStop(cName)
 	assert.NoError(t, err)
 	pending(ucListTime)
+
+	isChange = false
+	stopped = metrics.GetStoppedContainers()
+	for i := range stopped {
+		if stopped[i] == cName {
+			isChange = true
+		}
+	}
+	assert.True(t, isChange)
 
 	cMetrics = metrics.Get(cAll)
 	assert.Equal(t, cName, cMetrics.Stopped[0])

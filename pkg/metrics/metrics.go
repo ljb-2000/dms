@@ -50,6 +50,78 @@ func (m *metrics) Collect() {
 	}
 }
 
+// GetContainerLogs returns container logs
+func GetContainerLogs(id string) *string {
+	logs, err := docker.ContainersLogs(id)
+	if err != nil {
+		logger.Panic(err)
+	}
+
+	return &logs
+}
+
+// GetStoppedContainers returns stopped containers
+func (m *metrics) GetStoppedContainers() []string {
+	var (
+		stopped   []string
+		isStopped = false
+	)
+
+	// parse changes
+	if len(m.changes.changes) != 0 {
+		m.changes.RLock()
+		for id, status := range m.changes.changes {
+			if !status {
+				isStopped = true
+				stopped = append(stopped, id)
+			}
+		}
+		m.changes.RUnlock()
+	} else {
+		logger.Info("no changes")
+	}
+
+	// there are stopped containers
+	if isStopped {
+		return stopped
+	}
+
+	// no stopped containers
+	logger.Info("no stopped containers")
+	return []string{"no stopped containers"}
+}
+
+// GetLaunchedContainers returns Launched containers
+func (m *metrics) GetLaunchedContainers() []string {
+	var (
+		launched   []string
+		isLaunched = false
+	)
+
+	// parse changes
+	if len(m.changes.changes) != 0 {
+		m.changes.RLock()
+		for id, status := range m.changes.changes {
+			if status {
+				isLaunched = true
+				launched = append(launched, id)
+			}
+		}
+		m.changes.RUnlock()
+	} else {
+		logger.Info("no changes")
+	}
+
+	// there are launched containers
+	if isLaunched {
+		return launched
+	}
+
+	// no launched containers
+	logger.Info("no launched containers")
+	return []string{"no launched containers"}
+}
+
 // Get returns container(s) metrics
 func (m *metrics) Get(id string) *metricsAPI {
 	logger.Info("get container(s) metrics")
@@ -92,7 +164,7 @@ func (m *metrics) Get(id string) *metricsAPI {
 		}
 		m.changes.RUnlock()
 	} else {
-		logger.Info("no new containers")
+		logger.Info("no changes")
 	}
 
 	// return if no running containers

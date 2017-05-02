@@ -55,13 +55,14 @@ func (m *metrics) collect(id string) {
 	}
 }
 
-// clear metrics from map
+// remove container from map
 func (m *metrics) removeCFromMaps(id string) {
 	// added to stopped containers array
 	m.changes.Lock()
 	m.changes.changes[id] = false
 	m.changes.Unlock()
 
+	// remove from metrics map
 	m.metrics.Lock()
 	delete(m.metrics.metrics, id)
 	m.metrics.Unlock()
