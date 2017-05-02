@@ -130,7 +130,7 @@ function showCharts(ids) {
 
             changeServerStatus('500', error)
         })
-    }, 3000)
+    }, 1000)
 }
 
 // update cpu, mem, time data array

@@ -1,15 +1,14 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/lavrs/docker-monitoring-service)](https://goreportcard.com/report/github.com/lavrs/docker-monitoring-service) [![Build Status](https://travis-ci.org/lavrs/docker-monitoring-service.svg?branch=master)](https://travis-ci.org/lavrs/docker-monitoring-service)
 # Docker monitoring service
 This service allows you to monitor the loading of the docker container in real time with the ability to view load charts
-## Usage
-### View load charts
+## View load charts
 ```
 $ cd cmd/daemon/
 $ go run daemon.go
 $ http://localhost:4222/charts
 ```
-### API Usage
-#### Get container(s) metrics
+## API Usage
+### Get container(s) metrics
 REQUEST
 ```
 GET /api/metrics/:id HTTP/1.1
@@ -45,7 +44,7 @@ Content-Type: application/json
   "message": "message"
 }
 ```
-#### Get container logs
+### Get container logs
 REQUEST
 ```
 GET /api/logs/:id HTTP/1.1
@@ -58,7 +57,7 @@ Content-Type: application/json
   "logs": "logs"
 }
 ```
-#### Get stopped containers
+### Get stopped containers
 REQUEST
 ```
 GET /api/stopped HTTP/1.1
@@ -71,7 +70,7 @@ Content-Type: application/json
   "stopped": ["container"]
 }
 ```
-#### Get launched containers
+### Get launched containers
 REQUEST
 ```
 GET /api/launched HTTP/1.1
@@ -84,7 +83,7 @@ Content-Type: application/json
   "launched": ["container"]
 }
 ```
-### CLI Usage
+## CLI Usage
 ```
 NAME:
    dms - Docker monitoring service
