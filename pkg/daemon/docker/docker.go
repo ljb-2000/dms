@@ -6,7 +6,7 @@ import (
 	c "github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/client"
-	"github.com/lavrs/docker-monitoring-service/pkg/logger"
+	"github.com/lavrs/dms/pkg/logger"
 	"io"
 	"io/ioutil"
 	"os"

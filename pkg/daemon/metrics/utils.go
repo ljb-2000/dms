@@ -3,8 +3,8 @@ package metrics
 import (
 	"encoding/json"
 	"github.com/docker/docker/api/types"
-	"github.com/lavrs/docker-monitoring-service/pkg/docker"
-	"github.com/lavrs/docker-monitoring-service/pkg/logger"
+	"github.com/lavrs/dms/pkg/daemon/docker"
+	"github.com/lavrs/dms/pkg/logger"
 	"io"
 	"time"
 )

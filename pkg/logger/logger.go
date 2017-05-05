@@ -2,7 +2,7 @@ package logger
 
 import (
 	log "github.com/Sirupsen/logrus"
-	"github.com/lavrs/docker-monitoring-service/pkg/context"
+	"github.com/lavrs/dms/pkg/context"
 )
 
 // Info print info log

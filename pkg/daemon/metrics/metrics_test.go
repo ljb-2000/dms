@@ -1,10 +1,10 @@
 package metrics_test
 
 import (
-	"github.com/lavrs/docker-monitoring-service/pkg/context"
-	"github.com/lavrs/docker-monitoring-service/pkg/docker"
-	"github.com/lavrs/docker-monitoring-service/pkg/logger"
-	m "github.com/lavrs/docker-monitoring-service/pkg/metrics"
+	"github.com/lavrs/dms/pkg/context"
+	"github.com/lavrs/dms/pkg/daemon/docker"
+	m "github.com/lavrs/dms/pkg/daemon/metrics"
+	"github.com/lavrs/dms/pkg/logger"
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"

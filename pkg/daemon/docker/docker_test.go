@@ -3,7 +3,7 @@ package docker_test
 import (
 	"encoding/json"
 	"github.com/docker/docker/api/types"
-	"github.com/lavrs/docker-monitoring-service/pkg/docker"
+	"github.com/lavrs/dms/pkg/daemon/docker"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )

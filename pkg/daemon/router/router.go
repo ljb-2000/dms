@@ -1,8 +1,8 @@
 package router
 
 import (
-	"github.com/lavrs/docker-monitoring-service/pkg/context"
-	"github.com/lavrs/docker-monitoring-service/pkg/metrics"
+	"github.com/lavrs/dms/pkg/context"
+	"github.com/lavrs/dms/pkg/daemon/metrics"
 	"gopkg.in/kataras/iris.v6"
 	"gopkg.in/kataras/iris.v6/adaptors/cors"
 	"gopkg.in/kataras/iris.v6/adaptors/httprouter"

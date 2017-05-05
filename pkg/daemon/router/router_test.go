@@ -1,8 +1,8 @@
-package router_test
+package router
 
 import (
-	"github.com/lavrs/docker-monitoring-service/pkg/context"
-	"github.com/lavrs/docker-monitoring-service/pkg/daemon/router"
+	"github.com/lavrs/dms/pkg/context"
+	"github.com/lavrs/dms/pkg/daemon/router"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/kataras/iris.v6"
 	"gopkg.in/kataras/iris.v6/httptest"

@@ -2,8 +2,8 @@ package metrics
 
 import (
 	"github.com/docker/docker/cli/command/formatter"
-	"github.com/lavrs/docker-monitoring-service/pkg/docker"
-	"github.com/lavrs/docker-monitoring-service/pkg/logger"
+	"github.com/lavrs/dms/pkg/daemon/docker"
+	"github.com/lavrs/dms/pkg/logger"
 	"strings"
 	"time"
 )
