@@ -33,6 +33,13 @@ func (m *metrics) SetUCListInterval(t time.Duration) {
 
 // Collect collect metrics (check new containers)
 func (m *metrics) Collect() {
+	// if metrics already collects, returns
+	if m.started {
+		logger.Info("metrics already collecting")
+		return
+	}
+	m.started = true
+
 	for range time.Tick(m.uCListInterval) {
 		containers, err := docker.ContainerList()
 		if err != nil {

@@ -24,10 +24,10 @@ func app() *iris.Framework {
 		cors.New(cors.Options{AllowedOrigins: []string{"*"}}),
 		view.HTML("./website", ".html"),
 	)
-	app.Use(recover.New())
 	app.StaticWeb("/static", "website/static")
 	if context.Get().Debug {
 		app.Use(
+			recover.New(),
 			logger.New(logger.Config{
 				Status: true,
 				IP:     true,

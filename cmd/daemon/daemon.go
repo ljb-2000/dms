@@ -46,7 +46,7 @@ func main() {
 			return nil
 		}
 
-		// set debug mode
+		// set debug mode if use flag "d"
 		context.Get().Debug = c.Bool("d")
 
 		return daemon.Run(c.String("p"), c.Int("ucli"), c.Int("uci"))

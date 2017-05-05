@@ -47,6 +47,10 @@ func TestGetMetricsObj(t *testing.T) {
 	assert.NotNil(t, m.Get())
 }
 
+func TestMetricsAlreadyCollecting(t *testing.T) {
+	m.Get().Collect()
+}
+
 func TestGetNoRunningContainers(t *testing.T) {
 	cMetrics := m.Get().Get(cName)
 	assert.Equal(t, "no running containers", cMetrics.Message)

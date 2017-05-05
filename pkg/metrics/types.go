@@ -18,6 +18,7 @@ type changeMap struct {
 
 // type for collect metrics
 type metrics struct {
+	started           bool
 	metrics           metricsMap
 	changes           changeMap
 	uCListInterval    time.Duration
