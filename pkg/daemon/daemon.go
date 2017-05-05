@@ -2,13 +2,13 @@ package daemon
 
 import (
 	"github.com/lavrs/dms/pkg/context"
-	"github.com/lavrs/dms/pkg/daemon/router"
 	m "github.com/lavrs/dms/pkg/daemon/metrics"
+	"github.com/lavrs/dms/pkg/daemon/router"
+	"github.com/lavrs/dms/pkg/logger"
 	"github.com/urfave/cli"
 	"net/http"
 	"os"
 	"time"
-    "github.com/lavrs/dms/pkg/logger"
 )
 
 // Run start daemon
@@ -60,7 +60,7 @@ func Run() {
 		// start collect metrics
 		go m.Get().Collect()
 
-        // listen and serve
+		// listen and serve
 		fsrv := &http.Server{
 			Handler: router.App(),
 			Addr:    ":" + c.String("p"),

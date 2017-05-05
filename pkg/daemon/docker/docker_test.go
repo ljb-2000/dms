@@ -1,4 +1,4 @@
-package docker_test
+package docker
 
 import (
 	"encoding/json"
