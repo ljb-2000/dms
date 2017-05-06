@@ -52,6 +52,8 @@ func Run() {
 
 		// set debug mode if use flag "d"
 		context.Get().Debug = c.Bool("d")
+		// set daemon address
+		context.Get().Address = ":" + c.String("p")
 
 		// set update intervals
 		m.Get().SetUCListInterval(time.Duration(c.Int("ucli")) * time.Second)
@@ -63,7 +65,7 @@ func Run() {
 		// listen and serve
 		fsrv := &http.Server{
 			Handler: router.App(),
-			Addr:    ":" + c.String("p"),
+			Addr:    context.Get().Address,
 		}
 		return fsrv.ListenAndServe()
 	}

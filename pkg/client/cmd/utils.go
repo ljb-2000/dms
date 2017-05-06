@@ -4,14 +4,15 @@ import (
 	"encoding/json"
 	"github.com/docker/docker/cli/command/formatter"
 	h "github.com/lavrs/dms/pkg/client/http"
+	"github.com/lavrs/dms/pkg/context"
 	"github.com/lavrs/dms/pkg/logger"
 )
 
 // GetContainersLogs returns container logs
-func GetContainersLogs(url, id string) (string, error) {
+func GetContainersLogs(id string) (string, error) {
 	logger.Info("containers logs cmd")
 
-	body, err := h.HTTPGET(url + "/logs/" + id)
+	body, err := h.HTTPGET(context.Get().Address + "/logs/" + id)
 	if err != nil {
 		return "", err
 	}
@@ -26,10 +27,10 @@ func GetContainersLogs(url, id string) (string, error) {
 }
 
 // GetContainersMetrics returns container(s) metrics
-func GetContainersMetrics(url, id string) ([]*formatter.ContainerStats, error) {
+func GetContainersMetrics(id string) ([]*formatter.ContainerStats, error) {
 	logger.Info("containers metrics cmd")
 
-	body, err := h.HTTPGET(url + "/metrics/" + id)
+	body, err := h.HTTPGET(context.Get().Address + "/metrics/" + id)
 	if err != nil {
 		return nil, err
 	}
@@ -44,10 +45,10 @@ func GetContainersMetrics(url, id string) ([]*formatter.ContainerStats, error) {
 }
 
 // GetStoppedContainers returns stopped containers
-func GetStoppedContainers(url string) ([]string, error) {
+func GetStoppedContainers() ([]string, error) {
 	logger.Info("stopped containers cmd")
 
-	body, err := h.HTTPGET(url + "/stopped")
+	body, err := h.HTTPGET(context.Get().Address + "/stopped")
 	if err != nil {
 		return nil, err
 	}
@@ -62,10 +63,10 @@ func GetStoppedContainers(url string) ([]string, error) {
 }
 
 // GetLaunchedContainers returns launched containers
-func GetLaunchedContainers(url string) ([]string, error) {
+func GetLaunchedContainers() ([]string, error) {
 	logger.Info("launched containers cmd")
 
-	body, err := h.HTTPGET(url + "/launched")
+	body, err := h.HTTPGET(context.Get().Address + "/launched")
 	if err != nil {
 		return nil, err
 	}

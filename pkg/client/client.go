@@ -10,6 +10,7 @@ import (
 func Run() {
 	const (
 		debug = "d"
+		addr  = "a"
 	)
 
 	app := cli.NewApp()
@@ -22,6 +23,11 @@ func Run() {
 		cli.BoolFlag{
 			Name:  debug + ", debug",
 			Usage: "set debug mode",
+		},
+		cli.StringFlag{
+			Name:  addr + ", addr",
+			Value: "http://localhost:4222/api",
+			Usage: "set daemon address",
 		},
 	}
 
@@ -36,6 +42,8 @@ func Run() {
 
 		// set debug mode if use flag "d"
 		context.Get().Debug = c.Bool(debug)
+		// set daemon address
+		context.Get().Address = c.String(addr)
 
 		return nil
 	}

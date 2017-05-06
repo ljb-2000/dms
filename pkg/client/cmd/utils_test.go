@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/docker/docker/cli/command/formatter"
 	"github.com/lavrs/dms/pkg/client/cmd"
+	"github.com/lavrs/dms/pkg/context"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
@@ -33,11 +34,13 @@ func TestGetContainerLogs(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	logs, err := cmd.GetContainersLogs(ts.URL, "container")
+	context.Get().Address = ts.URL
+
+	logs, err := cmd.GetContainersLogs("container")
 	assert.NoError(t, err)
 	assert.Equal(t, testLogs, logs)
 
-	_, err = cmd.GetContainersLogs(ts.URL, "container")
+	_, err = cmd.GetContainersLogs("container")
 	assert.Error(t, err)
 }
 
@@ -65,11 +68,13 @@ func TestGetStoppedContainers(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	stopped, err := cmd.GetStoppedContainers(ts.URL)
+	context.Get().Address = ts.URL
+
+	stopped, err := cmd.GetStoppedContainers()
 	assert.NoError(t, err)
 	assert.Equal(t, testStopped, stopped)
 
-	_, err = cmd.GetStoppedContainers(ts.URL)
+	_, err = cmd.GetStoppedContainers()
 	assert.Error(t, err)
 }
 
@@ -97,11 +102,13 @@ func TestGetLaunchedContainers(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	launched, err := cmd.GetLaunchedContainers(ts.URL)
+	context.Get().Address = ts.URL
+
+	launched, err := cmd.GetLaunchedContainers()
 	assert.NoError(t, err)
 	assert.Equal(t, testLaunched, launched)
 
-	_, err = cmd.GetLaunchedContainers(ts.URL)
+	_, err = cmd.GetLaunchedContainers()
 	assert.Error(t, err)
 }
 
@@ -146,11 +153,13 @@ func TestGetContainersMetrics(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	metrics, err := cmd.GetContainersMetrics(ts.URL, "all")
+	context.Get().Address = ts.URL
+
+	metrics, err := cmd.GetContainersMetrics("all")
 	assert.NoError(t, err)
 	assert.Equal(t, container1, metrics[0].ID)
 	assert.Equal(t, container2, metrics[1].ID)
 
-	_, err = cmd.GetContainersMetrics(ts.URL, "all")
+	_, err = cmd.GetContainersMetrics("all")
 	assert.Error(t, err)
 }
