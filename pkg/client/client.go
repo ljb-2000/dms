@@ -4,7 +4,6 @@ import (
 	"github.com/lavrs/dms/pkg/context"
 	"github.com/lavrs/dms/pkg/logger"
 	"github.com/urfave/cli"
-	"log"
 	"os"
 )
 
