@@ -13,25 +13,39 @@ import (
 func TestGetContainerLogs(t *testing.T) {
 	const testLogs = "test logs"
 
+	var isInternalServerError = false
+
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		logs, err := json.Marshal(map[string]string{
 			"logs": testLogs,
 		})
 		assert.NoError(t, err)
 
-		w.WriteHeader(200)
-		_, err = w.Write(logs)
-		assert.NoError(t, err)
+		if !isInternalServerError {
+			isInternalServerError = true
+
+			w.WriteHeader(http.StatusOK)
+			_, err = w.Write(logs)
+			assert.NoError(t, err)
+		} else {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
 	}))
 	defer ts.Close()
 
 	logs, err := cmd.GetContainersLogs(ts.URL, "container")
 	assert.NoError(t, err)
 	assert.Equal(t, testLogs, logs)
+
+	_, err = cmd.GetContainersLogs(ts.URL, "container")
+	assert.Error(t, err)
 }
 
 func TestGetStoppedContainers(t *testing.T) {
-	var testStopped = []string{"container1", "container2"}
+	var (
+		testStopped           = []string{"container1", "container2"}
+		isInternalServerError = false
+	)
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		stopped, err := json.Marshal(map[string][]string{
@@ -39,19 +53,31 @@ func TestGetStoppedContainers(t *testing.T) {
 		})
 		assert.NoError(t, err)
 
-		w.WriteHeader(200)
-		_, err = w.Write(stopped)
-		assert.NoError(t, err)
+		if !isInternalServerError {
+			isInternalServerError = true
+
+			w.WriteHeader(http.StatusOK)
+			_, err = w.Write(stopped)
+			assert.NoError(t, err)
+		} else {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
 	}))
 	defer ts.Close()
 
 	stopped, err := cmd.GetStoppedContainers(ts.URL)
 	assert.NoError(t, err)
 	assert.Equal(t, testStopped, stopped)
+
+	_, err = cmd.GetStoppedContainers(ts.URL)
+	assert.Error(t, err)
 }
 
 func TestGetLaunchedContainers(t *testing.T) {
-	var testLaunched = []string{"container1", "container2"}
+	var (
+		testLaunched          = []string{"container1", "container2"}
+		isInternalServerError = false
+	)
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		launched, err := json.Marshal(map[string][]string{
@@ -59,15 +85,24 @@ func TestGetLaunchedContainers(t *testing.T) {
 		})
 		assert.NoError(t, err)
 
-		w.WriteHeader(200)
-		_, err = w.Write(launched)
-		assert.NoError(t, err)
+		if !isInternalServerError {
+			isInternalServerError = true
+
+			w.WriteHeader(http.StatusOK)
+			_, err = w.Write(launched)
+			assert.NoError(t, err)
+		} else {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
 	}))
 	defer ts.Close()
 
 	launched, err := cmd.GetLaunchedContainers(ts.URL)
 	assert.NoError(t, err)
 	assert.Equal(t, testLaunched, launched)
+
+	_, err = cmd.GetLaunchedContainers(ts.URL)
+	assert.Error(t, err)
 }
 
 func TestGetContainersMetrics(t *testing.T) {
@@ -75,6 +110,8 @@ func TestGetContainersMetrics(t *testing.T) {
 		container1 = "container1"
 		container2 = "container2"
 	)
+
+	var isInternalServerError = false
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var (
@@ -97,9 +134,15 @@ func TestGetContainersMetrics(t *testing.T) {
 		})
 		assert.NoError(t, err)
 
-		w.WriteHeader(200)
-		_, err = w.Write(metrics)
-		assert.NoError(t, err)
+		if !isInternalServerError {
+			isInternalServerError = true
+
+			w.WriteHeader(http.StatusOK)
+			_, err = w.Write(metrics)
+			assert.NoError(t, err)
+		} else {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
 	}))
 	defer ts.Close()
 
@@ -107,4 +150,7 @@ func TestGetContainersMetrics(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, container1, metrics[0].ID)
 	assert.Equal(t, container2, metrics[1].ID)
+
+	_, err = cmd.GetContainersMetrics(ts.URL, "all")
+	assert.Error(t, err)
 }

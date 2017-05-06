@@ -69,6 +69,8 @@ func GetContainerLogs(id string) *string {
 
 // GetStoppedContainers returns stopped containers
 func (m *metrics) GetStoppedContainers() []string {
+    logger.Info("get stopped containers")
+
 	var (
 		stopped   []string
 		isStopped = false
@@ -100,6 +102,8 @@ func (m *metrics) GetStoppedContainers() []string {
 
 // GetLaunchedContainers returns Launched containers
 func (m *metrics) GetLaunchedContainers() []string {
+    logger.Info("get launched containers")
+
 	var (
 		launched   []string
 		isLaunched = false

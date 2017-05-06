@@ -4,10 +4,15 @@ import (
 	"github.com/lavrs/dms/pkg/context"
 	"github.com/lavrs/dms/pkg/logger"
 	"github.com/urfave/cli"
+	"log"
 	"os"
 )
 
 func Run() {
+	const (
+		debug = "d"
+	)
+
 	app := cli.NewApp()
 
 	app.Name = "dms"
@@ -15,13 +20,8 @@ func Run() {
 	app.Version = "0.1.0"
 
 	app.Flags = []cli.Flag{
-		cli.StringFlag{
-			Name:  "p, port",
-			Value: "4222",
-			Usage: "set daemon port",
-		},
 		cli.BoolFlag{
-			Name:  "d, debug",
+			Name:  debug + ", debug",
 			Usage: "set debug mode",
 		},
 	}
@@ -36,7 +36,7 @@ func Run() {
 		}
 
 		// set debug mode if use flag "d"
-		context.Get().Debug = c.Bool("d")
+		context.Get().Debug = c.Bool(debug)
 
 		return nil
 	}
