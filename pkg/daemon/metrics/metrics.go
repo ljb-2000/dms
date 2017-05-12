@@ -59,7 +59,7 @@ func (m *metrics) Collect() {
 
 // GetContainerLogs returns container logs
 func GetContainerLogs(id string) string {
-    logger.Debug("get container logs")
+	logger.Debug("get container logs")
 
 	logs, err := docker.ContainersLogs(id)
 	if err != nil {
