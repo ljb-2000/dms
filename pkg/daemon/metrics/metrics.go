@@ -1,7 +1,7 @@
 package metrics
 
 import (
-	"github.com/docker/docker/cli/command/formatter"
+	"github.com/docker/cli/cli/command/formatter"
 	"github.com/lavrs/dms/pkg/daemon/docker"
 	"github.com/lavrs/dms/pkg/logger"
 	"strings"
@@ -10,10 +10,10 @@ import (
 
 // init metrics
 var m = &metrics{
-	metrics:           metricsMap{metrics: make(map[string]*formatter.ContainerStats)},
-	changes:           changeMap{changes: make(map[string]bool)},
-	uCListInterval:    time.Second * 3,
-	uCMetricsInterval: time.Second * 1,
+	metrics:             metricsMap{metrics: make(map[string]*formatter.ContainerStats)},
+	changes:             changeMap{changes: make(map[string]bool)},
+	updCListInterval:    time.Second * 3,
+	updCMetricsInterval: time.Second * 1,
 }
 
 // Get returns metrics obj
@@ -23,12 +23,12 @@ func Get() *metrics {
 
 // SetUCMetricsInterval set update container metrics interval
 func (m *metrics) SetUCMetricsInterval(t time.Duration) {
-	m.uCMetricsInterval = t
+	m.updCMetricsInterval = t
 }
 
 // SetUCListInterval set update containers list interval
 func (m *metrics) SetUCListInterval(t time.Duration) {
-	m.uCListInterval = t
+	m.updCListInterval = t
 }
 
 // Collect collect metrics (check new containers)
@@ -40,7 +40,7 @@ func (m *metrics) Collect() {
 	}
 	m.started = true
 
-	for range time.Tick(m.uCListInterval) {
+	for range time.Tick(m.updCListInterval) {
 		containers, err := docker.ContainerList()
 		if err != nil {
 			logger.Panic(err)
@@ -58,13 +58,13 @@ func (m *metrics) Collect() {
 }
 
 // GetContainerLogs returns container logs
-func GetContainerLogs(id string) *string {
+func GetContainerLogs(id string) string {
 	logs, err := docker.ContainersLogs(id)
 	if err != nil {
-		logger.Panic(err)
+		return err.Error()
 	}
 
-	return &logs
+	return logs
 }
 
 // GetStoppedContainers returns stopped containers
@@ -193,11 +193,11 @@ func (m *metrics) Get(id string) *metricsAPI {
 	for _, id := range ids {
 		if data, ok := m.metrics.metrics[id]; ok {
 			metrics = append(metrics, data)
-		} else {
-			// if container are not running
-			logger.Info("container `", id, "` are not running")
-			isNotExist++
+			continue
 		}
+		// if container are not running
+		logger.Info("container `", id, "` are not running")
+		isNotExist++
 	}
 	m.metrics.RUnlock()
 	// returns if all specified containers are not running

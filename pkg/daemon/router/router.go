@@ -81,6 +81,6 @@ func getLaunched(ctx *iris.Context) {
 // get container logs
 func getLogs(ctx *iris.Context) {
 	ctx.JSON(iris.StatusOK, map[string]string{
-		"logs": *metrics.GetContainerLogs(ctx.Param("id")),
+		"logs": metrics.GetContainerLogs(ctx.Param("id")),
 	})
 }

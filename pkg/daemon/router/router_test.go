@@ -26,7 +26,10 @@ func TestApiMetrics(t *testing.T) {
 }
 
 func TestApiLogs(t *testing.T) {
-	e.GET("/api/logs/container").Expect().Status(iris.StatusInternalServerError)
+	e.GET("/api/logs/container").Expect().
+		Status(iris.StatusOK).
+		JSON().Object().Value("logs").
+		Equal("Error response from daemon: No such container: container")
 }
 
 func TestApiStopped(t *testing.T) {

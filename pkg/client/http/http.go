@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func HTTPGET(url string) ([]byte, error) {
+func GET(url string) ([]byte, error) {
 	resp, err := http.Get(url)
 	if err != nil {
 		return nil, err

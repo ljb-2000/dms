@@ -1,7 +1,7 @@
 package metrics
 
 import (
-	"github.com/docker/docker/cli/command/formatter"
+	"github.com/docker/cli/cli/command/formatter"
 	"sync"
 	"time"
 )
@@ -18,11 +18,11 @@ type changeMap struct {
 
 // type for collect metrics
 type metrics struct {
-	started           bool
-	metrics           metricsMap
-	changes           changeMap
-	uCListInterval    time.Duration
-	uCMetricsInterval time.Duration
+	started             bool
+	metrics             metricsMap
+	changes             changeMap
+	updCListInterval    time.Duration
+	updCMetricsInterval time.Duration
 }
 
 // type for API

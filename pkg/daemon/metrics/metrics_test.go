@@ -135,6 +135,7 @@ func TestContainerRemoveHandle(t *testing.T) {
 	pending(ucListTime)
 	err = docker.ContainerRemove(cName)
 	assert.NoError(t, err)
+	pending(ucMetricsTime)
 	err = docker.ImageRemove(cImage)
 	assert.NoError(t, err)
 }

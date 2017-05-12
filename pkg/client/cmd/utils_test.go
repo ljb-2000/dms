@@ -2,7 +2,7 @@ package cmd_test
 
 import (
 	"encoding/json"
-	"github.com/docker/docker/cli/command/formatter"
+	"github.com/docker/cli/cli/command/formatter"
 	"github.com/lavrs/dms/pkg/client/cmd"
 	"github.com/lavrs/dms/pkg/context"
 	"github.com/stretchr/testify/assert"
@@ -162,4 +162,8 @@ func TestGetContainersMetrics(t *testing.T) {
 
 	_, err = cmd.GetContainersMetrics("all")
 	assert.Error(t, err)
+}
+
+func TestCommands(t *testing.T) {
+
 }

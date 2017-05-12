@@ -9,10 +9,8 @@ import (
 	"testing"
 )
 
-func TestHTTPGET(t *testing.T) {
-	var (
-		isInternalServerError = false
-	)
+func TestGET(t *testing.T) {
+	var isInternalServerError = false
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		data, err := json.Marshal(map[string]string{
@@ -32,10 +30,10 @@ func TestHTTPGET(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	body, err := h.HTTPGET(ts.URL)
+	body, err := h.GET(ts.URL)
 	assert.NoError(t, err)
 	assert.Equal(t, `{"data":"data"}`, string(body))
 
-	_, err = h.HTTPGET(ts.URL)
+	_, err = h.GET(ts.URL)
 	assert.Error(t, err)
 }

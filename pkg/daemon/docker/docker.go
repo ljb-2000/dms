@@ -119,6 +119,7 @@ func ContainerRemove(cName string) error {
 func ContainersLogs(cName string) (string, error) {
 	reader, err := cli.ContainerLogs(context.Background(), cName, types.ContainerLogsOptions{
 		ShowStdout: true,
+		Since:      time.Since(time.Now().AddDate(0, 0, -1)).String(),
 	})
 	if err != nil {
 		return "", err

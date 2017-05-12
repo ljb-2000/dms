@@ -13,6 +13,13 @@ import (
 
 // Run start daemon
 func Run() {
+	const (
+		debug         = "d"
+		updConListInt = "ucli"
+		updConMetrics = "uci"
+		port          = "p"
+	)
+
 	app := cli.NewApp()
 
 	app.Name = "dms"
@@ -21,27 +28,28 @@ func Run() {
 
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
-			Name:  "p, port",
+			Name:  port + ", port",
 			Value: "4222",
 			Usage: "set daemon port",
 		},
 		cli.IntFlag{
-			Name:  "ucli, upd-container-list-interval",
+			Name:  updConListInt + ", upd-container-list-interval",
 			Value: 3,
 			Usage: "set update container list interval",
 		},
 		cli.IntFlag{
-			Name:  "uci, upd-container-interval",
+			Name:  updConMetrics + ", upd-container-interval",
 			Value: 1,
 			Usage: "set update container metrics interval",
 		},
 		cli.BoolFlag{
-			Name:  "d, debug",
+			Name:  debug + ", debug",
 			Usage: "set debug mode",
 		},
 	}
 
 	app.Action = func(c *cli.Context) error {
+		// if args > 0 -> error
 		if c.NArg() > 0 {
 			err := cli.ShowAppHelp(c)
 			if err != nil {
@@ -51,13 +59,13 @@ func Run() {
 		}
 
 		// set debug mode if use flag "d"
-		context.Get().Debug = c.Bool("d")
+		context.Get().Debug = c.Bool(debug)
 		// set daemon address
-		context.Get().Address = ":" + c.String("p")
+		context.Get().Address = ":" + c.String(port)
 
 		// set update intervals
-		m.Get().SetUCListInterval(time.Duration(c.Int("ucli")) * time.Second)
-		m.Get().SetUCMetricsInterval(time.Duration(c.Int("uci")) * time.Second)
+		m.Get().SetUCListInterval(time.Duration(c.Int(updConListInt)) * time.Second)
+		m.Get().SetUCMetricsInterval(time.Duration(c.Int(updConMetrics)) * time.Second)
 
 		// start collect metrics
 		go m.Get().Collect()

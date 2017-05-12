@@ -26,7 +26,7 @@ func (m *metrics) collect(id string) {
 	dec := json.NewDecoder(reader)
 	var statsJSON *types.StatsJSON
 
-	for range time.Tick(m.uCMetricsInterval) {
+	for range time.Tick(m.updCMetricsInterval) {
 		err = dec.Decode(&statsJSON)
 		if err != nil {
 			// container removed
