@@ -7,5 +7,5 @@ $ go run daemon.go
 $ http://localhost:4222/charts
 ```
 ## Documentation
-[Daemon](https://github.com/lavrs/dms/tree/master/pkg/client/README.md)<br>
-[Client](https://github.com/lavrs/dms/tree/master/pkg/daemon/README.md)
+[Daemon](https://github.com/lavrs/dms/tree/master/pkg/daemon/README.md)<br>
+[Client](https://github.com/lavrs/dms/tree/master/pkg/client/README.md)
