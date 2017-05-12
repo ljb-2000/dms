@@ -112,18 +112,18 @@ func (m *metrics) GetLaunchedContainers() []string {
 	)
 
 	// parse changes
+	m.changes.RLock()
 	if len(m.changes.changes) != 0 {
-		m.changes.RLock()
 		for id, status := range m.changes.changes {
 			if status {
 				isLaunched = true
 				launched = append(launched, id)
 			}
 		}
-		m.changes.RUnlock()
 	} else {
 		logger.Debug("no changes")
 	}
+	m.changes.RUnlock()
 
 	// there are launched containers
 	if isLaunched {
