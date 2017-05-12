@@ -171,7 +171,7 @@ func (m *metrics) Get(id string) *metricsAPI {
 			}
 		}
 
-		// clear changes
+		// flush changes
 		for k := range m.changes.changes {
 			delete(m.changes.changes, k)
 		}

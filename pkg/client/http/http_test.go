@@ -10,30 +10,27 @@ import (
 )
 
 func TestGET(t *testing.T) {
-	var isInternalServerError = false
-
-	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	ts200 := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		data, err := json.Marshal(map[string]string{
 			"data": "data",
 		})
 		assert.NoError(t, err)
 
-		if !isInternalServerError {
-			isInternalServerError = true
-
-			w.WriteHeader(http.StatusOK)
-			_, err = w.Write(data)
-			assert.NoError(t, err)
-		} else {
-			w.WriteHeader(http.StatusInternalServerError)
-		}
+		w.WriteHeader(http.StatusOK)
+		_, err = w.Write(data)
+		assert.NoError(t, err)
 	}))
-	defer ts.Close()
+	defer ts200.Close()
 
-	body, err := h.GET(ts.URL)
+	ts500 := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	}))
+	defer ts500.Close()
+
+	body, err := h.GET(ts200.URL)
 	assert.NoError(t, err)
 	assert.Equal(t, `{"data":"data"}`, string(body))
 
-	_, err = h.GET(ts.URL)
+	_, err = h.GET(ts500.URL)
 	assert.Error(t, err)
 }
