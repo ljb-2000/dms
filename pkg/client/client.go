@@ -79,7 +79,7 @@ func Run() {
 		},
 		cli.StringFlag{
 			Name:  addr + ", addr",
-			Value: "http://localhost:4222/api",
+			Value: "http://localhost:4222",
 			Usage: "set daemon address",
 		},
 	}

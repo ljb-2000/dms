@@ -18,7 +18,7 @@ COMMANDS:
 
 GLOBAL OPTIONS:
    -d, --debug             set debug mode
-   -a value, --addr value  set daemon address (default: "http://localhost:4222/api")
+   -a value, --addr value  set daemon address (default: "http://localhost:4222")
    --help, -h              show help
    --version, -v           print the version
 ```
