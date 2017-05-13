@@ -11,11 +11,18 @@ import (
 
 var e = httptest.New(router.App(), nil)
 
-func TestApp(t *testing.T) {
+func init() {
 	context.Get().Debug = true
+}
 
+func TestApp(t *testing.T) {
 	e = httptest.New(router.App(), t)
 	assert.NotNil(t, e)
+}
+
+func TestStatus(t *testing.T) {
+	e.GET("/status").Expect().
+		Status(iris.StatusOK)
 }
 
 func TestApiMetrics(t *testing.T) {

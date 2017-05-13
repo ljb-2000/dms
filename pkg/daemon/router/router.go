@@ -40,6 +40,9 @@ func app() *iris.Framework {
 
 	app.Get("/charts", charts)
 	app.OnError(iris.StatusNotFound, p404)
+
+	app.Get("/status", status)
+
 	app.Get("/api/logs/:id", getLogs)
 	app.Get("/api/metrics/:id", getMetrics)
 	app.Get("/api/stopped", getStopped)
@@ -47,6 +50,10 @@ func app() *iris.Framework {
 
 	app.Boot()
 	return app
+}
+
+func status(ctx *iris.Context) {
+	ctx.WriteHeader(iris.StatusOK)
 }
 
 // charts page
