@@ -35,4 +35,10 @@ export default function () {
         "status was 200": (r) => r.status === httpStatusOK,
         "transaction time OK": (r) => r.timings.duration < maxDuration
     })
+
+    let status = http.get("http://localhost:4222/status")
+    check(status, {
+        "status was 200": (r) => r.status === httpStatusOK,
+        "transaction time OK": (r) => r.timings.duration < maxDuration
+    })
 }
