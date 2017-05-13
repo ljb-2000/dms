@@ -10,9 +10,11 @@ import (
 
 func Run() {
 	const (
+        // flags
 		debug = "d"
 		addr  = "a"
 
+        // commands
 		stopped  = "stopped"
 		launched = "launched"
 		metrics  = "metrics"
@@ -20,6 +22,7 @@ func Run() {
 	)
 
 	app := cli.NewApp()
+
 	app.Name = "dms"
 	app.Usage = "Docker monitoring service"
 	app.Version = "0.1.0"

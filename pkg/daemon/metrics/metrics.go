@@ -140,11 +140,9 @@ func (m *metrics) Get(id string) *metricsAPI {
 	logger.Debug("get container(s) metrics")
 
 	var (
-		metrics    []*formatter.ContainerStats
-		ids        []string
-		launched   []string
-		stopped    []string
-		isNotExist = 0
+		metrics                []*formatter.ContainerStats
+		ids, launched, stopped []string
+		isNotExist             = 0
 	)
 
 	// parse id (all / one / ... containers)
