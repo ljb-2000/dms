@@ -1,3 +1,29 @@
+# Run daemon
+```
+NAME:
+   dms - Docker monitoring service
+
+USAGE:
+   dms [global options] command [command options] [arguments...]
+
+VERSION:
+   0.1.0
+
+COMMANDS:
+     help, h  Shows a list of commands or help for one command
+
+GLOBAL OPTIONS:
+   -p value, --port value                             set daemon port (default: "4222")
+   --ucli value, --upd-container-list-interval value  set update container list interval (default: 3)
+   --uci value, --upd-container-interval value        set update container metrics interval (default: 1)
+   -d, --debug                                        set debug mode
+   --help, -h                                         show help
+   --version, -v                                      print the version
+```
+## Example
+```
+$ dms
+```
 # API Usage
 ## Get container(s) metrics
 REQUEST
