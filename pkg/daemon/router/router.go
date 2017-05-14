@@ -1,7 +1,8 @@
 package router
 
 import (
-	"github.com/lavrs/dms/pkg/context"
+	"context"
+	mctx "github.com/lavrs/dms/pkg/context"
 	"github.com/lavrs/dms/pkg/daemon/metrics"
 	"gopkg.in/kataras/iris.v6"
 	"gopkg.in/kataras/iris.v6/adaptors/cors"
@@ -9,6 +10,7 @@ import (
 	"gopkg.in/kataras/iris.v6/adaptors/view"
 	"gopkg.in/kataras/iris.v6/middleware/logger"
 	"gopkg.in/kataras/iris.v6/middleware/recover"
+	"time"
 )
 
 // App returns daemon configuration
@@ -20,12 +22,18 @@ func App() *iris.Framework {
 func app() *iris.Framework {
 	app := iris.New()
 	app.Adapt(
+		iris.EventPolicy{
+			Interrupted: func(*iris.Framework) {
+				ctx, _ := context.WithTimeout(context.Background(), 1*time.Second)
+				app.Shutdown(ctx)
+			},
+		},
 		httprouter.New(),
 		cors.New(cors.Options{AllowedOrigins: []string{"*"}}),
 		view.HTML("./website", ".html"),
 	)
 	app.StaticWeb("/static", "website/static")
-	if context.Get().Debug {
+	if mctx.Get().Debug {
 		app.Use(
 			recover.New(),
 			logger.New(logger.Config{

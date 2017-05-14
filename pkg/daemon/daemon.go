@@ -14,7 +14,7 @@ import (
 // Run start daemon
 func Run() {
 	const (
-        // flags
+		// flags
 		debug         = "d"
 		updConListInt = "ucli"
 		updConMetrics = "uci"

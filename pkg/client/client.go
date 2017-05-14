@@ -10,11 +10,11 @@ import (
 
 func Run() {
 	const (
-        // flags
+		// flags
 		debug = "d"
 		addr  = "a"
 
-        // commands
+		// commands
 		stopped  = "stopped"
 		launched = "launched"
 		metrics  = "metrics"
