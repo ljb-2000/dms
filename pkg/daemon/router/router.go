@@ -2,7 +2,7 @@ package router
 
 import (
 	"context"
-	mctx "github.com/lavrs/dms/pkg/context"
+	ctx "github.com/lavrs/dms/pkg/context"
 	"github.com/lavrs/dms/pkg/daemon/metrics"
 	"gopkg.in/kataras/iris.v6"
 	"gopkg.in/kataras/iris.v6/adaptors/cors"
@@ -24,8 +24,8 @@ func app() *iris.Framework {
 	app.Adapt(
 		iris.EventPolicy{
 			Interrupted: func(*iris.Framework) {
-				ctx, _ := context.WithTimeout(context.Background(), 1*time.Second)
-				app.Shutdown(ctx)
+				ctxwt, _ := context.WithTimeout(context.Background(), 1*time.Second)
+				app.Shutdown(ctxwt)
 			},
 		},
 		httprouter.New(),
@@ -33,7 +33,7 @@ func app() *iris.Framework {
 		view.HTML("./website", ".html"),
 	)
 	app.StaticWeb("/static", "website/static")
-	if mctx.Get().Debug {
+	if ctx.Get().Debug {
 		app.Use(
 			recover.New(),
 			logger.New(logger.Config{

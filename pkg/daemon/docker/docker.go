@@ -94,7 +94,9 @@ func ContainerStop(cName string) error {
 
 // ImageRemove removes image
 func ImageRemove(cImage string) error {
-	_, err := cli.ImageRemove(context.Background(), cImage, types.ImageRemoveOptions{})
+	_, err := cli.ImageRemove(context.Background(), cImage, types.ImageRemoveOptions{
+		Force: true,
+	})
 	if err != nil {
 		return err
 	}

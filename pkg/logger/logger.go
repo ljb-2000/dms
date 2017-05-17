@@ -11,10 +11,12 @@ var sugar *zap.SugaredLogger
 func init() {
 	config := zap.NewDevelopmentConfig()
 	config.DisableCaller = true
+
 	logger, err := config.Build()
 	if err != nil {
 		panic(err)
 	}
+
 	sugar = logger.Sugar()
 }
 
