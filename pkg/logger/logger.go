@@ -20,10 +20,10 @@ func init() {
 	sugar = logger.Sugar()
 }
 
-// Debug print debug log
-func Debug(data ...interface{}) {
+// Info print info log
+func Info(data ...interface{}) {
 	if context.Get().Debug {
-		sugar.Debug(data)
+		sugar.Info(data)
 	}
 }
 

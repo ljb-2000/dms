@@ -10,8 +10,6 @@ import (
 
 // GetContainersLogs returns container logs
 func GetContainersLogs(id string) (string, error) {
-	logger.Debug("containers logs cmd")
-
 	body, err := h.GET(context.Get().Address + "/api/logs/" + id)
 	if err != nil {
 		return "", err
@@ -23,13 +21,12 @@ func GetContainersLogs(id string) (string, error) {
 		return "", err
 	}
 
+	logger.Info(id, "container logs:", logs.Logs)
 	return logs.Logs, nil
 }
 
 // GetContainersMetrics returns container(s) metrics
 func GetContainersMetrics(id string) ([]*formatter.ContainerStats, error) {
-	logger.Debug("containers metrics cmd")
-
 	body, err := h.GET(context.Get().Address + "/api/metrics/" + id)
 	if err != nil {
 		return nil, err
@@ -41,13 +38,12 @@ func GetContainersMetrics(id string) ([]*formatter.ContainerStats, error) {
 		return nil, err
 	}
 
+	logger.Info(id, "container(s) metrics:", metrics.Metrics)
 	return metrics.Metrics, nil
 }
 
 // GetStoppedContainers returns stopped containers
 func GetStoppedContainers() ([]string, error) {
-	logger.Debug("stopped containers cmd")
-
 	body, err := h.GET(context.Get().Address + "/api/stopped")
 	if err != nil {
 		return nil, err
@@ -59,13 +55,12 @@ func GetStoppedContainers() ([]string, error) {
 		return nil, err
 	}
 
+	logger.Info("stopped containers:", stopped.Stopped)
 	return stopped.Stopped, nil
 }
 
 // GetLaunchedContainers returns launched containers
 func GetLaunchedContainers() ([]string, error) {
-	logger.Debug("launched containers cmd")
-
 	body, err := h.GET(context.Get().Address + "/api/launched")
 	if err != nil {
 		return nil, err
@@ -77,5 +72,6 @@ func GetLaunchedContainers() ([]string, error) {
 		return nil, err
 	}
 
+	logger.Info("launched containers:", launched.Launched)
 	return launched.Launched, nil
 }

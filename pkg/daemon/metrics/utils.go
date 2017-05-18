@@ -31,7 +31,7 @@ func (m *metrics) collect(id string) {
 		if err != nil {
 			// container removed
 			if err == io.EOF {
-				logger.Debug("container `", id, "` removed")
+				logger.Info("container `", id, "` removed")
 				m.removeCFromMaps(id)
 				return
 			}
@@ -43,7 +43,7 @@ func (m *metrics) collect(id string) {
 
 		// container stopped
 		if metrics.CPUPercentage == 0 {
-			logger.Debug("container `", id, "` stopped")
+			logger.Info("container `", id, "` stopped")
 			m.removeCFromMaps(id)
 			return
 		}

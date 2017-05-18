@@ -30,9 +30,9 @@ func app() *iris.Framework {
 		},
 		httprouter.New(),
 		cors.New(cors.Options{AllowedOrigins: []string{"*"}}),
-		view.HTML("./website", ".html"),
+		view.HTML("./dashboard", ".html"),
 	)
-	app.StaticWeb("/static", "website/static")
+	app.StaticWeb("/static", "dashboard/static")
 	if ctx.Get().Debug {
 		app.Use(
 			recover.New(),
@@ -46,7 +46,7 @@ func app() *iris.Framework {
 		app.Adapt(iris.DevLogger())
 	}
 
-	app.Get("/charts", charts)
+	app.Get("/dashboard", charts)
 	app.OnError(iris.StatusNotFound, p404)
 
 	app.Get("/status", status)

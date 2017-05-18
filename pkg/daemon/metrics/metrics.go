@@ -23,11 +23,13 @@ func Get() *metrics {
 
 // SetUCMetricsInterval set update container metrics interval
 func (m *metrics) SetUCMetricsInterval(t time.Duration) {
+	logger.Info("set update container metrics interval =", t)
 	m.updCMetricsInterval = t
 }
 
 // SetUCListInterval set update containers list interval
 func (m *metrics) SetUCListInterval(t time.Duration) {
+	logger.Info("set update containers list interval =", t)
 	m.updCListInterval = t
 }
 
@@ -35,7 +37,6 @@ func (m *metrics) SetUCListInterval(t time.Duration) {
 func (m *metrics) Collect() {
 	// if metrics already collects, returns
 	if m.started {
-		logger.Debug("metrics already collecting")
 		return
 	}
 	m.started = true
@@ -48,8 +49,7 @@ func (m *metrics) Collect() {
 
 		for _, container := range *containers {
 			if _, ok := m.metrics.metrics[container.Names[0][1:]]; !ok {
-				logger.Debug("new container `", container.Names[0][1:], "`")
-
+				logger.Info("new container `", container.Names[0][1:], "`")
 				// start collect new metrics
 				go m.collect(container.Names[0][1:])
 			}
@@ -59,20 +59,17 @@ func (m *metrics) Collect() {
 
 // GetContainerLogs returns container logs
 func GetContainerLogs(id string) string {
-	logger.Debug("get container logs")
-
 	logs, err := docker.ContainersLogs(id)
 	if err != nil {
 		return err.Error()
 	}
 
+	logger.Info(id, "container logs:", logs)
 	return logs
 }
 
 // GetStoppedContainers returns stopped containers
 func (m *metrics) GetStoppedContainers() []string {
-	logger.Debug("get stopped containers")
-
 	var (
 		stopped   []string
 		isStopped = false
@@ -88,9 +85,8 @@ func (m *metrics) GetStoppedContainers() []string {
 			}
 		}
 		m.changes.RUnlock()
-	} else {
-		logger.Debug("no changes")
 	}
+	logger.Info("stopped containers:", stopped)
 
 	// there are stopped containers
 	if isStopped {
@@ -98,14 +94,11 @@ func (m *metrics) GetStoppedContainers() []string {
 	}
 
 	// no stopped containers
-	logger.Debug("no stopped containers")
 	return []string{"no stopped containers"}
 }
 
 // GetLaunchedContainers returns Launched containers
 func (m *metrics) GetLaunchedContainers() []string {
-	logger.Debug("get launched containers")
-
 	var (
 		launched   []string
 		isLaunched = false
@@ -121,9 +114,10 @@ func (m *metrics) GetLaunchedContainers() []string {
 			}
 		}
 	} else {
-		logger.Debug("no changes")
+		logger.Info("no changes")
 	}
 	m.changes.RUnlock()
+	logger.Info("launched containers:", launched)
 
 	// there are launched containers
 	if isLaunched {
@@ -131,14 +125,11 @@ func (m *metrics) GetLaunchedContainers() []string {
 	}
 
 	// no launched containers
-	logger.Debug("no launched containers")
 	return []string{"no launched containers"}
 }
 
 // Get returns container(s) metrics
 func (m *metrics) Get(id string) *metricsAPI {
-	logger.Debug("get container(s) metrics")
-
 	var (
 		metrics                []*formatter.ContainerStats
 		ids, launched, stopped []string
@@ -157,6 +148,7 @@ func (m *metrics) Get(id string) *metricsAPI {
 	} else {
 		ids = append(ids, id)
 	}
+	logger.Info("get", ids, "container(s) metrics")
 
 	// parse changes
 	if len(m.changes.changes) != 0 {
@@ -174,13 +166,12 @@ func (m *metrics) Get(id string) *metricsAPI {
 			delete(m.changes.changes, k)
 		}
 		m.changes.RUnlock()
-	} else {
-		logger.Debug("no changes")
 	}
+	logger.Info("stopped:", stopped, "\nlaunched:", launched)
 
 	// return if no running containers
 	if len(m.metrics.metrics) == 0 {
-		logger.Debug("no running container")
+        logger.Info("no running containers")
 		return &metricsAPI{
 			Launched: launched,
 			Stopped:  stopped,
@@ -196,13 +187,13 @@ func (m *metrics) Get(id string) *metricsAPI {
 			continue
 		}
 		// if container are not running
-		logger.Debug("container `", id, "` are not running")
+		logger.Info("container `", id, "` are not running")
 		isNotExist++
 	}
 	m.metrics.RUnlock()
 	// returns if all specified containers are not running
 	if isNotExist == len(ids) {
-		logger.Debug("these containers are not running")
+		logger.Info("these containers:", ids, "are not running")
 		return &metricsAPI{
 			Launched: launched,
 			Stopped:  stopped,
@@ -211,7 +202,7 @@ func (m *metrics) Get(id string) *metricsAPI {
 	}
 
 	// returns metrics
-	logger.Debug("return metrics")
+	logger.Info(ids, "metrics: ", metrics)
 	return &metricsAPI{
 		Metrics:  &metrics,
 		Launched: launched,

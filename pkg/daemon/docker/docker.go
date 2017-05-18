@@ -15,10 +15,10 @@ import (
 
 var (
 	cli *client.Client
-	err error
 )
 
 func init() {
+    var err error
 	cli, err = client.NewEnvClient()
 	if err != nil {
 		logger.Panic(err)
@@ -59,7 +59,7 @@ func ContainerCreate(cImage, cName string) error {
 
 // ContainerStart launches container
 func ContainerStart(cName string) error {
-	err = cli.ContainerStart(context.Background(), cName, types.ContainerStartOptions{})
+	err := cli.ContainerStart(context.Background(), cName, types.ContainerStartOptions{})
 	if err != nil {
 		return err
 	}

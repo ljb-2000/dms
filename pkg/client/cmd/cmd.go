@@ -14,8 +14,7 @@ import (
 func ContainersLogsCmd(id string) {
 	logs, err := GetContainersLogs(id)
 	if err != nil {
-		logger.Debug("ContainersLogsCmd error")
-		fmt.Println("oops, some error, please, try later")
+		fmt.Println("Oops! Something went wrong, please try again")
 		return
 	}
 
@@ -26,14 +25,13 @@ func ContainersLogsCmd(id string) {
 func ContainersMetricsCmd(id []string) {
 	metrics, err := GetContainersMetrics(strings.Join(id, " "))
 	if err != nil {
-		logger.Debug("ContainersMetricsCmd error")
-		fmt.Println("oops, some error, please, try later")
+		fmt.Println("Oops! Something went wrong, please try again")
 		return
 	}
 
 	// if metrics length == 0 -> no running containers
 	if len(metrics) == 0 {
-		fmt.Println("no running containers")
+		fmt.Println("No running containers")
 		return
 	}
 
@@ -55,14 +53,13 @@ func ContainersMetricsCmd(id []string) {
 func StoppedContainersCmd() {
 	stopped, err := GetStoppedContainers()
 	if err != nil {
-		logger.Debug("StoppedContainersCmd error")
-		fmt.Println("oops, some error, please, try later")
+		fmt.Println("Oops! Something went wrong, please try again")
 		return
 	}
 
 	// if first stopped array element == "no stopped containers"
 	// -> no stopped containers
-	if stopped[0] == "no stopped containers" {
+	if stopped[0] == "No stopped containers" {
 		fmt.Println(stopped[0])
 		return
 	}
@@ -79,14 +76,13 @@ func StoppedContainersCmd() {
 func LaunchedContainersCmd() {
 	launched, err := GetLaunchedContainers()
 	if err != nil {
-		logger.Debug("LaunchedContainersCmd error")
-		fmt.Println("oops, some error, please, try later")
+		fmt.Println("Oops! Something went wrong, please try again")
 		return
 	}
 
 	// if first launched array element == "no launched containers"
 	// -> no launched containers
-	if launched[0] == "no launched containers" {
+	if launched[0] == "No launched containers" {
 		fmt.Println(launched[0])
 		return
 	}

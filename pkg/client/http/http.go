@@ -2,6 +2,7 @@ package http
 
 import (
 	"errors"
+	"github.com/lavrs/dms/pkg/logger"
 	"io/ioutil"
 	"net/http"
 )
@@ -26,5 +27,6 @@ func GET(url string) ([]byte, error) {
 		return nil, err
 	}
 
+	logger.Info("http get response data:", string(body))
 	return body, nil
 }

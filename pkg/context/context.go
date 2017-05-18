@@ -3,6 +3,7 @@ package context
 var context Context
 
 type Context struct {
+	Mock    bool
 	Debug   bool
 	Address string
 }
